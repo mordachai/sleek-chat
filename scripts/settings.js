@@ -10,16 +10,20 @@ Hooks.once('init', function() {
 
     reloadRequiredSettings.forEach(setting => {
         game.settings.register("sleek-chat", setting, {
-            name: setting === "hideNavButtonsAll" ? "Hide Always" : setting === "hideNavButtonsForPlayers" ? "Apply only to Players" : setting, // Adjust names as needed
+            name: setting === "hideNavButtonsAll" ? "Hide Always" : 
+                  setting === "hideNavButtonsForPlayers" ? "Apply only to Players" : 
+                  setting === "hideTotalResult" ? "Hide Total Result in Rolls" :
+                  setting === "hideAdvDisadv" ? "Hide Adv./Disadv. Buttons" : setting,
             hint: setting === "hideNavButtonsAll" ? "Check this box to hide the menus even if the sidebar is not collapsed."
                  : setting === "hideNavButtonsForPlayers" ? "If checked, the navigation buttons will only be hidden for players (non-GMs)."
+                 : setting === "hideTotalResult" ? "Check this to hide the total result in chat rolls. Useful for dice pool systems."
+                 : setting === "hideAdvDisadv" ? "Check this to hide both buttons. Use it if your system doesn't require these rolls."
                  : "This setting requires a reload to take effect.",
             scope: "world",
             config: true,
             type: Boolean,
             default: false,
             onChange: () => {
-                // Force application reload on change
                 Dialog.confirm({
                     title: "Reload Application?",
                     content: "<p>Some of the changed settings require a reload of the application to take effect. Would you like to reload now?</p>",
