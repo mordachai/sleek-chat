@@ -3,6 +3,8 @@
 export class RecentMessageDisplay {
     static init() {
         this.recentMessageContainer = null;
+        this.messageIds = [];
+        this.currentMessageIndex = -1;
         this.createRecentMessageContainer();
         this.hookChatLog();
     }
@@ -12,13 +14,42 @@ export class RecentMessageDisplay {
         if (sleekChat) {
             this.recentMessageContainer = document.createElement('div');
             this.recentMessageContainer.classList.add('recent-message-container');
+            
+            // Create message display area
+            const messageDisplay = document.createElement('div');
+            messageDisplay.classList.add('message-display');
+            this.recentMessageContainer.appendChild(messageDisplay);
+
+            // Create navigation buttons container
+            const navButtonsContainer = document.createElement('div');
+            navButtonsContainer.classList.add('nav-buttons-container');
+
+            // Create navigation buttons
+            const prevButton = document.createElement('button');
+            prevButton.innerHTML = '&#9668;'; // Left arrow
+            prevButton.classList.add('nav-button', 'prev-button');
+            prevButton.addEventListener('click', () => this.navigateMessages(-1));
+
+            const nextButton = document.createElement('button');
+            nextButton.innerHTML = '&#9658;'; // Right arrow
+            nextButton.classList.add('nav-button', 'next-button');
+            nextButton.addEventListener('click', () => this.navigateMessages(1));
+
+            // Append buttons to container
+            navButtonsContainer.appendChild(prevButton);
+            navButtonsContainer.appendChild(nextButton);
+
+            // Append elements
+            this.recentMessageContainer.appendChild(navButtonsContainer);
+
             sleekChat.insertBefore(this.recentMessageContainer, sleekChat.firstChild);
         }
     }
 
     static hookChatLog() {
         Hooks.on('createChatMessage', (message, options, userId) => {
-            this.updateRecentMessage(message);
+            this.addMessageToHistory(message.id);
+            this.updateRecentMessage(message.id);
         });
     }
 
@@ -29,13 +60,30 @@ export class RecentMessageDisplay {
         }
     }
 
-    static async updateRecentMessage(message) {
+    static addMessageToHistory(messageId) {
+        this.messageIds.push(messageId);
+        if (this.messageIds.length > 50) { // Keep last 50 messages
+            this.messageIds.shift();
+        }
+        this.currentMessageIndex = this.messageIds.length - 1;
+    }
+
+    static async updateRecentMessage(messageId) {
         if (!this.recentMessageContainer) return;
 
-        // Clear previous content
-        this.recentMessageContainer.innerHTML = '';
+        const messageDisplay = this.recentMessageContainer.querySelector('.message-display');
+        messageDisplay.innerHTML = '';
 
-        // Create a simplified message display
+        const message = game.messages.get(messageId);
+        if (message) {
+            const messageElement = await this.createMessageElement(message);
+            messageDisplay.appendChild(messageElement);
+        }
+
+        this.updateButtonStates();
+    }
+
+    static async createMessageElement(message) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('recent-message');
 
@@ -61,8 +109,7 @@ export class RecentMessageDisplay {
                 messageElement.innerHTML += message.content;
         }
 
-        // Add the simplified message to the container
-        this.recentMessageContainer.appendChild(messageElement);
+        return messageElement;
     }
 
     static async handleRollMessage(message, messageElement) {
@@ -73,5 +120,28 @@ export class RecentMessageDisplay {
         } else {
             messageElement.innerHTML += message.content;
         }
+    }
+
+    static async navigateMessages(direction) {
+        this.currentMessageIndex += direction;
+        if (this.currentMessageIndex < 0) {
+            this.currentMessageIndex = 0;
+        } else if (this.currentMessageIndex >= this.messageIds.length) {
+            this.currentMessageIndex = this.messageIds.length - 1;
+        }
+
+        const messageId = this.messageIds[this.currentMessageIndex];
+        if (messageId) {
+            await this.updateRecentMessage(messageId);
+        }
+
+        this.updateButtonStates();
+    }
+
+    static updateButtonStates() {
+        const prevButton = this.recentMessageContainer.querySelector('.prev-button');
+        const nextButton = this.recentMessageContainer.querySelector('.next-button');
+        prevButton.disabled = this.currentMessageIndex === 0;
+        nextButton.disabled = this.currentMessageIndex === this.messageIds.length - 1;
     }
 }

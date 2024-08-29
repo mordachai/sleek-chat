@@ -131,9 +131,6 @@
 /*CHAT CARD MESSAGES*/
 
 .custom-chat-card {
-    /* border: 1px solid #4b4e52;
-    background-color: #2c2f33;
-    border-radius: 5px; */
     padding: 10px;
     margin-bottom: 5px;
 }
@@ -161,7 +158,6 @@
 .custom-chat-card .card-content p {
     margin: 0;
     font-size: 14px;
-    /* color: #ddd; */
 }
 
 
@@ -174,12 +170,10 @@
     margin-bottom: 5px;
     padding: 5px;
     height: auto;
-    overflow-y:hidden;
+    overflow-y: hidden;
     font-size: 1.0em;
-}
-
-.recent-message-container * {
-    pointer-events: none;
+    display: flex;
+    flex-direction: column;
 }
 
 .recent-message-container .message {
@@ -198,5 +192,41 @@
 
 .recent-message-container .message-content {
     padding: 0;
+}
+
+
+.recent-message-container .message-display {
+    flex-grow: 1;
+    padding: 0 5px;
+    margin-bottom: 5px;
+}
+
+.recent-message-container .nav-buttons-container {
+    display: flex;
+    justify-content: flex-end;
+    margin: 6px 5px;
+    padding: 2px 5px;
+    height: 15px;
+    border-top: 1px solid #4b4e52;
+}
+
+.recent-message-container .nav-button {
+    background-color: #4b4e52;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 2px 5px;
+    cursor: pointer;
+    font-size: 12px;
+    height: 15px;
+}
+
+.recent-message-container .nav-button:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+}
+
+.recent-message-container .nav-button:hover:not(:disabled) {
+    background-color: #5a6fb4;
 }
 
