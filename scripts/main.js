@@ -1,5 +1,7 @@
 import './settings.js';
 
+import { RecentMessageDisplay } from './recent-message-display.js';
+
 export function applyNavButtonHiding() {
     const hideAll = game.settings.get("sleek-chat", "hideNavButtonsAll");
     const hideForPlayersOnly = game.settings.get("sleek-chat", "hideNavButtonsForPlayers");
@@ -109,6 +111,7 @@ export function synchronizePlayerSettings() {
 
     applyNavButtonHiding();
 }
+
 
 Hooks.on("renderChatLog", async (app, html, data) => {
     if (!game.user.isGM) return;
@@ -297,6 +300,10 @@ Hooks.on('ready', () => {
     const hideTotalResult = game.settings.get("sleek-chat", "hideTotalResult");
     if (hideTotalResult) {
         console.log("Total result is hidden");
-        // Additional logic for hiding the total result if needed
+    }
+
+    // Initialize the RecentMessageDisplay if enabled
+    if (game.settings.get("sleek-chat", "showRecentMessage")) {
+        RecentMessageDisplay.init();
     }
 });

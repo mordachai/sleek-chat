@@ -134,4 +134,20 @@ Hooks.once('init', function() {
         default: false,
         onChange: () => applyNavButtonHiding()
     });
+
+    game.settings.register("sleek-chat", "showRecentMessage", {
+        name: "Show Recent Message",
+        hint: "Display the most recent chat message above the chat input area.",
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: true,
+        onChange: value => {
+            if (value) {
+                RecentMessageDisplay.init();
+            } else {
+                RecentMessageDisplay.removeContainer();
+            }
+        }
+    });
 });
