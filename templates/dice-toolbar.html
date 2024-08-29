@@ -1,0 +1,50 @@
+<div class="sleek-chat">
+    <textarea id="custom-chat-input" rows="2" placeholder="Type your message..."></textarea>
+    
+    <div class="dice-buttons">
+      <!-- Dice buttons with counters -->
+      <button data-dice="d4">
+        <img src="modules/sleek-chat/ui/d4.svg" alt="D4">
+        <span class="dice-count" data-dice="d4">0</span>
+      </button>
+      <button data-dice="d6">
+        <img src="modules/sleek-chat/ui/d6.svg" alt="D6">
+        <span class="dice-count" data-dice="d6">0</span>
+      </button>
+      <button data-dice="d8">
+        <img src="modules/sleek-chat/ui/d8.svg" alt="D8">
+        <span class="dice-count" data-dice="d8">0</span>
+      </button>
+      <button data-dice="d10">
+        <img src="modules/sleek-chat/ui/d10.svg" alt="D10">
+        <span class="dice-count" data-dice="d10">0</span>
+      </button>
+      <button data-dice="d12">
+        <img src="modules/sleek-chat/ui/d12.svg" alt="D12">
+        <span class="dice-count" data-dice="d12">0</span>
+      </button>
+      <button data-dice="d20">
+        <img src="modules/sleek-chat/ui/d20.svg" alt="D20">
+        <span class="dice-count" data-dice="d20">0</span>
+      </button>
+      <button data-dice="d100">
+        <img src="modules/sleek-chat/ui/d100.svg" alt="D100">
+        <span class="dice-count" data-dice="d100">0</span>
+      </button>
+    </div>
+  
+    <div class="custom-dice-controls">
+      <!-- Modifier controls -->
+      <button id="decrease-modifier">-</button>
+      <input type="number" id="modifier" value="0">
+      <button id="increase-modifier">+</button>
+      
+      <!-- Advantage/Disadvantage buttons -->
+      <button id="advantage-toggle" class="adv-toggle">Adv</button>
+      <button id="disadvantage-toggle" class="disadv-toggle">Disadv</button>
+      
+      <!-- Roll button -->
+      <button id="roll-dice">Roll!</button>
+    </div>
+  </div>
+  

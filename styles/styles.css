@@ -1,0 +1,161 @@
+.sleek-chat {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 5px;
+    background-color: #2c2f334a;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    width: 300px;
+    position: absolute;
+    bottom: 10px; /* Positioning from the bottom of the canvas */
+    right: 10px;  /* Positioning from the right of the canvas */
+    z-index: 100; /* Ensure it appears above other elements */
+    display: none; /* Start hidden */
+    opacity: 0.8;
+}
+
+#custom-chat-input {
+    width: 100%;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #4b4e52;
+    background-color: #1a1c1f;
+    color: #fff;
+    margin-bottom: 5px;
+    resize: none; /* Prevent resizing */
+    box-sizing: border-box;
+}
+
+.dice-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    margin-bottom: 5px;
+}
+
+.sleek-chat button {
+    background-color: #1a1c1f;
+    border: none;
+    padding: 0;
+    margin: 2px;
+    cursor: pointer;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
+    position: relative;
+}
+
+.sleek-chat button img {
+    width: 100%;
+    height: 100%;
+    filter: invert(62%) sepia(66%) saturate(420%) hue-rotate(144deg) brightness(95%) contrast(93%);
+}
+
+.sleek-chat button:hover img {
+    filter: invert(72%) sepia(76%) saturate(530%) hue-rotate(144deg) brightness(105%) contrast(93%);
+}
+
+.sleek-chat button .dice-count {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: #ff652f;
+    color: #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    line-height: 20px;
+    z-index: 10;
+}
+
+.custom-dice-modifier,
+.custom-dice-roll,
+.custom-dice-controls {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-bottom: 5px;
+    flex: 0;
+}
+
+.custom-dice-controls input[type="number"] {
+    width: 40px;
+    height: 35px;
+    text-align: center;
+    padding: 0;
+    border-radius: 5px;
+    border: 1px solid #4b4e52;
+    background-color: #1a1c1f;
+    color: #ffffff;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.custom-dice-controls button {
+    background-color: #4b4e52;
+    color: #fff;
+    padding: 0;
+    width: 40px;
+    height: 35px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin: 0 2px;
+}
+
+.custom-dice-controls button:hover {
+    background-color: #7289da;
+}
+
+.custom-dice-controls button.active {
+    background-color: #3ba55c;
+}
+
+#disadvantage-toggle.active {
+    background-color: #e63946;
+}
+
+
+/*CHAT CARD MESSAGES*/
+
+.custom-chat-card {
+    border: 1px solid #4b4e52;
+    background-color: #2c2f33;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 5px;
+}
+
+.custom-chat-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #4b4e52;
+    padding-bottom: 5px;
+}
+
+.custom-chat-card .card-header h3 {
+    margin: 0;
+    font-size: 14px;
+    color: #fff;
+}
+
+.custom-chat-card .card-header small {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.custom-chat-card .card-content p {
+    margin: 0;
+    font-size: 14px;
+    color: #ddd;
+}
+
