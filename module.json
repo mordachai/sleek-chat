@@ -1,0 +1,27 @@
+{
+  "id": "sleek-chat",
+  "title": "Sleek Chat",
+  "description": "A minimalist dice rolling toolbar that integrates seamlessly with the Foundry VTT chat, focusing on a clean and uncluttered interface.",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "12"
+  },
+  "authors": [
+    {
+      "name": "Gus",
+      "flags": {}
+    }
+  ],
+  "styles": [
+    "styles/styles.css"
+  ],
+  "esmodules": [
+    "scripts/main.js",
+    "scripts/settings.js"
+  ],
+  "url": "https://github.com/mordachai/sleek-chat",
+  "manifest": "https://github.com/mordachai/sleek-chat/raw/main/module.json",
+  "download": "https://github.com/mordachai/sleek-chat/raw/main/sleek-chat.zip",
+  "license": "MIT"
+}
