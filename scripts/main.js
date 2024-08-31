@@ -1,7 +1,7 @@
 import './settings.js';
-
 import { RecentMessageDisplay } from './recent-message-display.js';
 
+// Function to apply navigation button hiding based on settings
 export function applyNavButtonHiding() {
     const hideAll = game.settings.get("sleek-chat", "hideNavButtonsAll");
     const hideForPlayersOnly = game.settings.get("sleek-chat", "hideNavButtonsForPlayers");
@@ -76,16 +76,7 @@ export function applyNavButtonHiding() {
     Hooks.on('updateSetting', updateButtonVisibility);
 }
 
-
-
-function hideAllNavButtons() {
-    const buttons = document.querySelectorAll('[data-tab]');
-    buttons.forEach(button => {
-        button.style.display = "none";
-    });
-    console.log("All navigation buttons are hidden for players due to 'Apply only to Players' setting.");
-}
-
+// Function to synchronize player settings with GM settings
 export function synchronizePlayerSettings() {
     const keysToSync = [
         "hideNavButtonsAll",
@@ -112,12 +103,20 @@ export function synchronizePlayerSettings() {
     applyNavButtonHiding();
 }
 
-
+// Hook to render the custom Sleek Chat UI on Chat Log render
 Hooks.on("renderChatLog", async (app, html, data) => {
     if (!game.user.isGM) return;
 
+    console.log("renderChatLog: Starting to render Sleek Chat UI.");
+
     const templatePath = "modules/sleek-chat/templates/dice-toolbar.html";
-    const toolbarHTML = await renderTemplate(templatePath, {});
+    const users = game.users.filter(user => user.id !== game.user.id);
+
+    console.log("Filtered users (excluding current user):", users);
+
+    const toolbarHTML = await renderTemplate(templatePath, { users });
+
+    console.log("Toolbar HTML generated. Appending to body.");
     $('body').append(toolbarHTML);
 
     let selectedDiceCounts = {};
@@ -137,8 +136,22 @@ Hooks.on("renderChatLog", async (app, html, data) => {
         const sidebar = document.getElementById('sidebar');
         const isCollapsed = sidebar.classList.contains('collapsed');
         const toolbar = document.querySelector('.sleek-chat');
+        const recentMessageContainer = document.querySelector('.recent-message-container');
+        const navButtonsContainer = document.querySelector('.nav-buttons-container');
+
+        console.log("Sidebar is collapsed:", isCollapsed);
+
         if (toolbar) {
             toolbar.style.display = isCollapsed ? 'flex' : 'none';
+            console.log("Toolbar visibility set to:", isCollapsed ? 'flex' : 'none');
+        }
+        if (recentMessageContainer) {
+            recentMessageContainer.style.display = isCollapsed ? 'block' : 'none';
+            console.log("Recent message container visibility set to:", isCollapsed ? 'block' : 'none');
+        }
+        if (navButtonsContainer) {
+            navButtonsContainer.style.display = isCollapsed ? 'flex' : 'none';
+            console.log("Nav buttons container visibility set to:", isCollapsed ? 'flex' : 'none');
         }
     };
 
@@ -200,7 +213,7 @@ Hooks.on("renderChatLog", async (app, html, data) => {
 
     $('#roll-dice').click(async () => {
         let rolls = [];
-
+    
         for (let dice in selectedDiceCounts) {
             let count = selectedDiceCounts[dice];
             if (count > 0) {
@@ -213,17 +226,19 @@ Hooks.on("renderChatLog", async (app, html, data) => {
                 }
             }
         }
-
+    
         if (rolls.length === 0) {
             ui.notifications.warn("Please select at least one die to roll.");
             return;
         }
-
+    
         const modifier = parseInt($('#modifier').val()) || 0;
         let rollFormula = rolls.join(" + ") + (modifier !== 0 ? ` + ${modifier}` : "");
-        const roll = new Roll(rollFormula);
-
-        await roll.evaluate({async: true});
+        const roll = new Roll(rollFormula, {}, {backgroundColor: 'rgba(128, 128, 255, 0.2)'}); // Example background color
+    
+        console.log("Evaluating roll formula:", rollFormula);
+        await roll.evaluate({async: true});  // Ensure roll is fully evaluated before proceeding
+        console.log("Roll evaluation complete. Total result:", roll.total);
 
         const templateData = {
             title: "Dice Roll",
@@ -237,14 +252,24 @@ Hooks.on("renderChatLog", async (app, html, data) => {
 
         const content = await renderTemplate("modules/sleek-chat/templates/common-roll.hbs", templateData);
 
-        ChatMessage.create({
+        console.log("Creating chat message with content:", content);
+
+        // Create and insert the chat message
+        const chatMessage = await ChatMessage.create({
             user: game.user._id,
             speaker: ChatMessage.getSpeaker(),
             content: content,
             rolls: [roll],
-            type: CONST.CHAT_MESSAGE_TYPES.ROLL
+            type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+            roll  // Include the roll in the message data
         });
 
+        console.log("Chat message created successfully.");
+        
+        // Update the RecentMessageDisplay with the new message ID
+        RecentMessageDisplay.updateRecentMessage(chatMessage.id);
+
+        // Reset the dice selection and UI
         selectedDiceCounts = {};
         $('.dice-count').text("0").hide();
         $('#modifier').val(0);
@@ -252,29 +277,6 @@ Hooks.on("renderChatLog", async (app, html, data) => {
         disadvantage = false;
         $('#advantage-toggle').removeClass("active");
         $('#disadvantage-toggle').removeClass("active");
-    });
-
-    $('#custom-chat-input').keypress(async (e) => {
-        if (e.which === 13 && !e.shiftKey) {
-            e.preventDefault();
-            const message = $('#custom-chat-input').val();
-            if (message.trim()) {
-                const templateData = {
-                    title: "Custom Message",
-                    author: game.user.name,
-                    message: message
-                };
-
-                const content = await renderTemplate("modules/sleek-chat/templates/custom-chat-card.hbs", templateData);
-
-                ChatMessage.create({
-                    content: content,
-                    speaker: ChatMessage.getSpeaker()
-                });
-
-                $('#custom-chat-input').val('');
-            }
-        }
     });
 
     function updateDiceCount(dice, count) {
@@ -287,8 +289,19 @@ Hooks.on("renderChatLog", async (app, html, data) => {
     }
 });
 
+// Hook to run when Foundry VTT is fully ready
 Hooks.on('ready', () => {
+    console.log("Foundry VTT is ready.");
     applyNavButtonHiding();
+
+    // Apply Sleek Chat Opacity
+    const sleekChatOpacity = game.settings.get("sleek-chat", "sleekChatOpacity");
+    $('.sleek-chat').css('opacity', sleekChatOpacity);
+    console.log("Sleek Chat Opacity set to:", sleekChatOpacity);
+
+    // Apply the dice color filter on startup
+    const diceColorFilter = game.settings.get("sleek-chat", "diceColorFilter");
+    applyDiceColorFilter(diceColorFilter);
 
     const hideAdvDisadv = game.settings.get("sleek-chat", "hideAdvDisadv");
     if (hideAdvDisadv) {
@@ -304,6 +317,37 @@ Hooks.on('ready', () => {
 
     // Initialize the RecentMessageDisplay if enabled
     if (game.settings.get("sleek-chat", "showRecentMessage")) {
+        console.log("Initializing RecentMessageDisplay.");
         RecentMessageDisplay.init();
     }
 });
+
+// Function to apply dice color filter based on settings
+export function applyDiceColorFilter(color) {
+    let filter;
+    switch (color) {
+        case "red":
+            filter = "brightness(0) saturate(100%) invert(22%) sepia(84%) saturate(2925%) hue-rotate(347deg) brightness(93%) contrast(107%)";
+            break;
+        case "green":
+            filter = "brightness(0) saturate(100%) invert(56%) sepia(99%) saturate(383%) hue-rotate(78deg) brightness(99%) contrast(102%)";
+            break;
+        case "cyan":
+            filter = "brightness(0) saturate(100%) invert(90%) sepia(61%) saturate(5882%) hue-rotate(133deg) brightness(108%) contrast(101%)";
+            break;
+        case "blue":
+            filter = "brightness(0) saturate(100%) invert(57%) sepia(50%) saturate(4091%) hue-rotate(189deg) brightness(99%) contrast(102%)";
+            break;
+        case "pink":
+            filter = "brightness(0) saturate(100%) invert(38%) sepia(98%) saturate(1593%) hue-rotate(275deg) brightness(91%) contrast(95%)";
+            break;
+        case "yellow":
+            filter = "brightness(0) saturate(100%) invert(88%) sepia(98%) saturate(2235%) hue-rotate(325deg) brightness(101%) contrast(100%)";
+            break;
+        case "white":
+        default:
+            filter = "none"; // No filter for white
+    }
+    document.documentElement.style.setProperty('--dice-filter', filter);
+    console.log(`Dice color filter applied: ${color}`);
+}

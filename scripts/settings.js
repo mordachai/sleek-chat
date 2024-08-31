@@ -1,11 +1,13 @@
 import { applyNavButtonHiding } from './main.js';
+import { applyDiceColorFilter } from './main.js';
+import { applyMessageFadeOutSettings } from './recent-message-display.js';
 
 Hooks.once('init', function() {
     const reloadRequiredSettings = [
         "hideNavButtonsAll",
         "hideNavButtonsForPlayers",
         "hideTotalResult",
-        "hideAdvDisadv"
+        "hideAdvDisadv",
     ];
 
     reloadRequiredSettings.forEach(setting => {
@@ -150,4 +152,82 @@ Hooks.once('init', function() {
             }
         }
     });
+
+    game.settings.register("sleek-chat", "messageFadeOutTime", {
+        name: "Message Fade Out Time (seconds)",
+        hint: "Set the time in seconds for messages to fade out.",
+        scope: "client",
+        config: true,
+        type: Number,
+        range: {
+            min: 1,
+            max: 20,
+            step: 0.5
+        },
+        default: 5,
+        onChange: value => {
+            // Placeholder for any immediate changes
+            console.log(`Message Fade Out Time set to: ${value} seconds`);
+        }
+    });
+
+    // Register new setting for message fade-out opacity
+    game.settings.register("sleek-chat", "messageFadeOutOpacity", {
+        name: "Message Fade Out Opacity",
+        hint: "Set the final opacity level for messages when they fade out.",
+        scope: "client",
+        config: true,
+        type: Number,
+        range: {
+            min: 0,
+            max: 1,
+            step: 0.1
+        },
+        default: 0.5,
+        onChange: value => {
+            // Placeholder for any immediate changes
+            console.log(`Message Fade Out Opacity set to: ${value}`);
+        }
+    });
+
+    // Register new setting for Sleek Chat opacity
+    game.settings.register("sleek-chat", "sleekChatOpacity", {
+        name: "Sleek Chat Opacity",
+        hint: "Set the opacity of the Sleek Chat interface.",
+        scope: "client",
+        config: true,
+        type: Number,
+        range: {
+            min: 0,
+            max: 1,
+            step: 0.1
+        },
+        default: 0.8,
+        onChange: value => {
+            // Placeholder for any immediate changes
+            console.log(`Sleek Chat Opacity set to: ${value}`);
+        }
+    });
+
+    game.settings.register("sleek-chat", "diceColorFilter", {
+        name: "Dice Color",
+        hint: "Select the color of the dice used in the Sleek Chat.",
+        scope: "client",
+        config: true,
+        type: String, // The type is String because the setting value is a string representing the selected option.
+        choices: {
+            "white": "White",
+            "red": "Red",
+            "green": "Green",
+            "cyan": "Cyan",
+            "blue": "Blue",
+            "pink": "Pink",
+            "yellow": "Yellow"
+        },
+        default: "white",
+        onChange: value => {
+            applyDiceColorFilter(value);
+        }
+    });
+
 });

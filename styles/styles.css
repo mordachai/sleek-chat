@@ -1,22 +1,31 @@
-.sleek-chat {
+/* Sleek Chat Container */
+.sleek-chat-container {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    padding: 5px;
-    background-color: #2c2f334a;
+    padding: 2px;
+    background-color: rgba(150, 150, 150, 0.1);
     border-radius: 5px;
     margin-bottom: 5px;
-    width: 300px;
+    width: 310px;
     position: absolute;
     bottom: 10px; /* Positioning from the bottom of the canvas */
     right: 10px;  /* Positioning from the right of the canvas */
     z-index: 100; /* Ensure it appears above other elements */
-    display: none; /* Start hidden */
-    opacity: 0.8;
+    opacity: 1.0; /* Container opacity */
 }
 
+/* Sleek Chat Area */
+.sleek-chat {
+    display: flex;
+    flex-direction: column;
+    opacity: 0.7;
+}
+
+/* Input Area Styling */
 #custom-chat-input {
-    width: 100%;
+    width: 300px;
+    margin: auto;
     padding: 5px;
     border-radius: 5px;
     border: 1px solid #4b4e52;
@@ -27,6 +36,7 @@
     box-sizing: border-box;
 }
 
+/* Dice Buttons Styling */
 .dice-buttons {
     display: flex;
     justify-content: space-evenly;
@@ -51,13 +61,12 @@
 .sleek-chat button img {
     width: 100%;
     height: 100%;
-    filter: invert(62%) sepia(66%) saturate(420%) hue-rotate(144deg) brightness(95%) contrast(93%);
+    border: none;
+    filter: var(--dice-filter, invert(62%) sepia(66%) saturate(420%) hue-rotate(144deg) brightness(95%) contrast(93%));
+    transition: filter 0.2s ease-in-out;
 }
 
-.sleek-chat button:hover img {
-    filter: invert(72%) sepia(76%) saturate(530%) hue-rotate(144deg) brightness(105%) contrast(93%);
-}
-
+/* Dice Count Styling */
 .sleek-chat button .dice-count {
     position: absolute;
     top: -10px;
@@ -75,6 +84,7 @@
     z-index: 10;
 }
 
+/* Custom Dice Controls */
 .custom-dice-modifier,
 .custom-dice-roll,
 .custom-dice-controls {
@@ -127,12 +137,12 @@
     align-self: stretch; 
 }
 
-
-/*CHAT CARD MESSAGES*/
-
+/* Chat Card Messages */
 .custom-chat-card {
     padding: 10px;
-    margin-bottom: 5px;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .custom-chat-card .card-header {
@@ -147,41 +157,30 @@
 .custom-chat-card .card-header h3 {
     margin: 0;
     font-size: 14px;
-    color: #fff;
 }
 
 .custom-chat-card .card-header small {
     font-size: 12px;
-    color: #aaa;
 }
 
 .custom-chat-card .card-content p {
     margin: 0;
     font-size: 14px;
+    word-wrap: break-word; /* Allows text to wrap if necessary */
 }
 
-
-/*SLEEK CHAT*/
-
+/* Sleek Chat Recent Message Container */
 .recent-message-container {
-    background-color: #eae7d7;
-    border: 1px solid #7289da;
     border-radius: 5px;
-    margin-bottom: 5px;
-    padding: 5px;
-    height: auto;
     overflow-y: hidden;
-    font-size: 1.0em;
     display: flex;
     flex-direction: column;
 }
 
-.recent-message-container .message {
-    background: none;
-    border: none;
-    box-shadow: none;
-    margin: 0;
-    padding: 0;
+.recent-message-container .recent-message {
+    background-color: inherit;
+    border-radius: 5px;
+    margin-bottom: 5px;
 }
 
 .recent-message-container .message-header {
@@ -194,39 +193,74 @@
     padding: 0;
 }
 
-
 .recent-message-container .message-display {
     flex-grow: 1;
-    padding: 0 5px;
-    margin-bottom: 5px;
 }
 
-.recent-message-container .nav-buttons-container {
+/* Navigation Buttons Container */
+.nav-buttons-container {
     display: flex;
-    justify-content: flex-end;
-    margin: 6px 5px;
-    padding: 2px 5px;
-    height: 15px;
-    border-top: 1px solid #4b4e52;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0px 5px;
+    padding: 0px;
+    height: 20px;
 }
 
-.recent-message-container .nav-button {
+#whisper-recipient {
+    width: 120px;
+    padding: 1px;
+    margin-bottom: 4px;
+    border-radius: 3px;
+    border: 1px solid #4b4e52;
     background-color: #4b4e52;
     color: white;
+    height: 20px;
+}
+
+#whisper-recipient option {
+    background-color: #4b4e52;
+    color: white;
+}
+
+.nav-buttons-container .nav-button {
+    background-color: #4b4e52;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: none;
     border-radius: 3px;
-    padding: 2px 5px;
     cursor: pointer;
     font-size: 12px;
-    height: 15px;
+    width: 35px;
+    height: 20px; 
+    opacity: 0.8;
 }
 
-.recent-message-container .nav-button:disabled {
+.nav-buttons-container .nav-button:disabled {
     background-color: #a0a0a0;
     cursor: not-allowed;
+    opacity: 0.8;
 }
 
-.recent-message-container .nav-button:hover:not(:disabled) {
+.nav-buttons-container .nav-button:hover:not(:disabled) {
     background-color: #5a6fb4;
+    opacity: 0.9;
 }
 
+/* Animation for message display */
+@keyframes slide-in {
+    0% {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-in {
+    animation: slide-in 0.5s ease-out forwards; /* Adjusted duration */
+}

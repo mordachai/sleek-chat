@@ -1,5 +1,25 @@
-<div class="sleek-chat">
-    <textarea id="custom-chat-input" rows="2" placeholder="Type your message..."></textarea>
+<div class="sleek-chat-container">
+  <div class="recent-message-container">
+    <div class="message-display"></div>
+  </div>
+
+  <div class="nav-buttons-container">
+    <div>
+      <select id="whisper-recipient">
+        <option value="">Public</option>
+        {{#each users}}
+        <option value="{{this.id}}">{{this.name}}</option>
+        {{/each}}
+      </select>
+    </div>
+    <div  style="display: flex;">
+      <button class="nav-button prev-button">&#9668;</button>
+      <button class="nav-button next-button">&#9658;</button>
+    </div>
+  </div>
+
+  <div class="sleek-chat">
+    <textarea id="custom-chat-input" rows="2" placeholder=""></textarea>
     
     <div class="dice-buttons">
       <!-- Dice buttons with counters -->
@@ -47,4 +67,4 @@
       <button id="roll-dice">Roll!</button>
     </div>
   </div>
-  
+</div>
