@@ -296,7 +296,7 @@ Hooks.on("renderChatLog", async (app, html, data) => {
             speaker: ChatMessage.getSpeaker(),
             content: content,
             rolls: [roll],
-            type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+            type: CONST.CHAT_MESSAGE_STYLES.ROLL,
             roll  // Include the roll in the message data
         });
 
