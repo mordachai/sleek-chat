@@ -41,7 +41,7 @@ https://github.com/mordachai/sleek-chat/raw/main/module.json
 - **Hide Total Result in Rolls:** Useful for systems where you want to show dice rolls without revealing the total, like some dice pool systems.
 - **Hide Adv./Disadv. Buttons:** Remove advantage/disadvantage options if not needed in your game system.
 
-- **Enable Debug Mode:** Shows debug information on console.
+- **Enable Debug Mode:** Display debug information on console.
 
 ### Usage Tips
 
