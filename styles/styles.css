@@ -13,6 +13,7 @@
     right: 10px;  /* Positioning from the right of the canvas */
     z-index: 100; /* Ensure it appears above other elements */
     opacity: 1.0; /* Container opacity */
+    transition: none;
 }
 
 /* Sleek Chat Area */
@@ -263,4 +264,14 @@
 
 .animate-slide-in {
     animation: slide-in 0.5s ease-out forwards; /* Adjusted duration */
+}
+
+.drag-handle {
+    cursor: move;
+    padding: 5px;
+    text-align: center;
+    background-color: rgba(75, 78, 82, 0.1);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    color: #d6d6d6c8;
 }

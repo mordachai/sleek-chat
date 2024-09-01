@@ -1,5 +1,6 @@
 import './settings.js';
 import { RecentMessageDisplay } from './recent-message-display.js';
+import { updateDragAndDropState } from './drag-drop.js';
 
 // Function to apply navigation button hiding based on settings
 export function applyNavButtonHiding() {
@@ -105,19 +106,52 @@ export function synchronizePlayerSettings() {
 
 // Hook to render the custom Sleek Chat UI on Chat Log render
 Hooks.on("renderChatLog", async (app, html, data) => {
-    if (!game.user.isGM) return;
+    console.log("renderChatLog: Starting to render Sleek Chat UI for all users.");
 
-    console.log("renderChatLog: Starting to render Sleek Chat UI.");
-
+    // Load your custom toolbar template
     const templatePath = "modules/sleek-chat/templates/dice-toolbar.html";
     const users = game.users.filter(user => user.id !== game.user.id);
-
-    console.log("Filtered users (excluding current user):", users);
-
     const toolbarHTML = await renderTemplate(templatePath, { users });
 
     console.log("Toolbar HTML generated. Appending to body.");
     $('body').append(toolbarHTML);
+
+    // Select the custom chat input element
+    const chatInput = document.getElementById('custom-chat-input');
+
+    // Event listener for sending message on Enter key press
+    chatInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();  // Prevent the default behavior of adding a new line
+            sendMessage();
+        }
+    });
+
+    // Function to handle sending messages
+    function sendMessage() {
+        // Capture the content from the chat input including images and formatting
+        const messageContent = chatInput.innerHTML.trim();
+        if (messageContent.length === 0) return;  // Do not send empty messages
+
+        // Get the selected whisper recipient (if any)
+        const whisperRecipient = document.getElementById('whisper-recipient').value;
+        let whisper = null;
+        if (whisperRecipient) {
+            whisper = [whisperRecipient];
+        }
+
+        // Create and send the chat message
+        ChatMessage.create({
+            user: game.user.id,
+            speaker: ChatMessage.getSpeaker(),
+            content: messageContent,
+            type: CONST.CHAT_MESSAGE_TYPES.IC,
+            whisper: whisper
+        });
+
+        // Clear the input field after sending the message
+        chatInput.innerHTML = '';
+    }
 
     let selectedDiceCounts = {};
     let advantage = false;
@@ -302,6 +336,9 @@ Hooks.on('ready', () => {
     // Apply the dice color filter on startup
     const diceColorFilter = game.settings.get("sleek-chat", "diceColorFilter");
     applyDiceColorFilter(diceColorFilter);
+
+    // Initialize drag and drop
+    updateDragAndDropState(game.settings.get("sleek-chat", "enableDragAndDrop"));
 
     const hideAdvDisadv = game.settings.get("sleek-chat", "hideAdvDisadv");
     if (hideAdvDisadv) {

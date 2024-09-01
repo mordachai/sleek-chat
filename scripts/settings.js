@@ -1,6 +1,7 @@
 import { applyNavButtonHiding } from './main.js';
 import { applyDiceColorFilter } from './main.js';
 import { applyMessageFadeOutSettings } from './recent-message-display.js';
+import { updateDragAndDropState } from './drag-drop.js';
 
 Hooks.once('init', function() {
     const reloadRequiredSettings = [
@@ -135,6 +136,18 @@ Hooks.once('init', function() {
         type: Boolean,
         default: false,
         onChange: () => applyNavButtonHiding()
+    });
+
+    game.settings.register("sleek-chat", "enableDragAndDrop", {
+        name: "Enable Drag and Drop",
+        hint: "Allow the Sleek Chat interface to be dragged and positioned anywhere on the screen.",
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: false,
+        onChange: value => {
+            updateDragAndDropState(value);
+        }
     });
 
     game.settings.register("sleek-chat", "showRecentMessage", {

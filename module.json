@@ -19,7 +19,8 @@
   "esmodules": [
     "scripts/main.js",
     "scripts/settings.js",
-    "scripts/recent-message-display.js"
+    "scripts/recent-message-display.js",
+    "scripts/drag-drop.js"
   ],
   "url": "https://github.com/mordachai/sleek-chat",
   "manifest": "https://github.com/mordachai/sleek-chat/raw/main/module.json",
