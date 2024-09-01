@@ -108,7 +108,6 @@ export function synchronizePlayerSettings() {
 Hooks.on("renderChatLog", async (app, html, data) => {
     console.log("renderChatLog: Starting to render Sleek Chat UI for all users.");
 
-    // Load your custom toolbar template
     const templatePath = "modules/sleek-chat/templates/dice-toolbar.html";
     const users = game.users.filter(user => user.id !== game.user.id);
     const toolbarHTML = await renderTemplate(templatePath, { users });
@@ -116,41 +115,40 @@ Hooks.on("renderChatLog", async (app, html, data) => {
     console.log("Toolbar HTML generated. Appending to body.");
     $('body').append(toolbarHTML);
 
-    // Select the custom chat input element
+    // Add the event listener for Enter key press in the chat input
     const chatInput = document.getElementById('custom-chat-input');
 
-    // Event listener for sending message on Enter key press
     chatInput.addEventListener('keydown', function(event) {
         if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();  // Prevent the default behavior of adding a new line
+            event.preventDefault();  // Prevents newline in the textarea
             sendMessage();
         }
     });
 
-    // Function to handle sending messages
     function sendMessage() {
-        // Capture the content from the chat input including images and formatting
-        const messageContent = chatInput.innerHTML.trim();
-        if (messageContent.length === 0) return;  // Do not send empty messages
+        const messageContent = chatInput.value.trim();
+        if (messageContent.length === 0) return;  // Don't send empty messages
 
-        // Get the selected whisper recipient (if any)
+        // Get the selected whisper recipient
         const whisperRecipient = document.getElementById('whisper-recipient').value;
         let whisper = null;
+
+        // If a whisper recipient is selected, set the whisper array
         if (whisperRecipient) {
             whisper = [whisperRecipient];
         }
 
-        // Create and send the chat message
+        // Create the chat message, including the whisper if applicable
         ChatMessage.create({
             user: game.user.id,
             speaker: ChatMessage.getSpeaker(),
             content: messageContent,
-            type: CONST.CHAT_MESSAGE_TYPES.IC,
-            whisper: whisper
+            type: CONST.CHAT_MESSAGE_STYLES.IC,
+            whisper: whisper // Add the whisper array if it's set
         });
 
-        // Clear the input field after sending the message
-        chatInput.innerHTML = '';
+        // Clear the input field
+        chatInput.value = '';
     }
 
     let selectedDiceCounts = {};
@@ -172,6 +170,7 @@ Hooks.on("renderChatLog", async (app, html, data) => {
         const toolbar = document.querySelector('.sleek-chat');
         const recentMessageContainer = document.querySelector('.recent-message-container');
         const navButtonsContainer = document.querySelector('.nav-buttons-container');
+        const sleekChatContainer = document.querySelector('.sleek-chat-container');
 
         console.log("Sidebar is collapsed:", isCollapsed);
 
@@ -186,6 +185,9 @@ Hooks.on("renderChatLog", async (app, html, data) => {
         if (navButtonsContainer) {
             navButtonsContainer.style.display = isCollapsed ? 'flex' : 'none';
             console.log("Nav buttons container visibility set to:", isCollapsed ? 'flex' : 'none');
+        }
+        if (sleekChatContainer) {
+            sleekChatContainer.style.display = isCollapsed ? 'block' : 'none';
         }
     };
 

@@ -17,6 +17,7 @@ export function updateDragAndDropState(enabled) {
         resetPosition(container);
         disableDragging(container, dragHandle);
     }
+
 }
 
 function resetPosition(container) {

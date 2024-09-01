@@ -215,7 +215,7 @@ Hooks.once('init', function() {
             max: 1,
             step: 0.1
         },
-        default: 0.8,
+        default: 0.7,
         onChange: value => {
             // Placeholder for any immediate changes
             console.log(`Sleek Chat Opacity set to: ${value}`);
