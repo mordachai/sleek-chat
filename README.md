@@ -25,25 +25,19 @@ https://github.com/mordachai/sleek-chat/raw/main/module.json
 
 ### The Sleek Chat will appear only when you collapse the Foundry sidebar.
 
-**Enable Drag and Drop:** Allow the Sleek Chat interface to be repositioned on the screen.
-**Sleek Chat Opacity:** Adjust the overall opacity of the Sleek Chat interface (0.1 to 1.0).
-
-### Message Display
-
-**Message Fade Out Time:** Set the duration (in seconds) before messages start to fade out.
-**Message Fade Out Opacity:** Define the final opacity level for faded messages (0.1 to 1.0).
-
-### Dice Rolling
-
-- **Hide Total Result in Rolls:** Useful for systems where you want to show dice rolls without revealing the total, like some dice pool systems.
-- **Hide Adv./Disadv. Buttons:** Remove advantage/disadvantage options if not needed in your game system.
-- **Dice Color:** Choose from various color options for the dice icons (white, red, green, cyan, blue, pink, yellow).
-
-### UI Customization
-
+- **Enable Drag and Drop:** Allow the Sleek Chat interface to be repositioned on the screen.
+- **Sleek Chat Opacity:** Adjust the overall opacity of the Sleek Chat interface (0.1 to 1.0).
 - **Hide Navigation Menus:** You can occult the selected navigation buttons in the sidebar to help lessen the cluttering, keeping only the ones your players need.
 - **Hide Always:** Keep the selected menus hidden even when the sidebar is expanded.
 - **Apply only to Players:** Hide navigation buttons only for non-GM users, while you keep seeing everything.
+- **Dice Color:** Choose from various color options for the dice icons (white, red, green, cyan, blue, pink, yellow).
+
+### Message Display
+
+- **Message Fade Out Time:** Set the duration (in seconds) before messages start to fade out.
+- **Message Fade Out Opacity:** Define the final opacity level for faded messages (0.1 to 1.0).
+- **Hide Total Result in Rolls:** Useful for systems where you want to show dice rolls without revealing the total, like some dice pool systems.
+- **Hide Adv./Disadv. Buttons:** Remove advantage/disadvantage options if not needed in your game system.
 
 ### Usage Tips
 
