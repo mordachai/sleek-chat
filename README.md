@@ -4,6 +4,8 @@
 
 **Sleek Chat** is a minimalist chat, roll and message interface for Foundry VTT that enhances immersion by reducing UI clutter. Maximize their virtual tabletop space it's the ideal companion for story-focused and visually immersive games.
 
+![image](https://github.com/user-attachments/assets/c39f24ce-467d-4593-bcde-156685089401)
+
 ## Installation
 
 To install this module, follow these steps:
