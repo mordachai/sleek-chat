@@ -1,3 +1,4 @@
+import { debugLog } from './sleek-chat-debug.js';
 import { applyNavButtonHiding } from './main.js';
 import { applyDiceColorFilter } from './main.js';
 import { applyMessageFadeOutSettings } from './recent-message-display.js';
@@ -31,7 +32,7 @@ Hooks.once('init', function() {
                     title: "Reload Application?",
                     content: "<p>Some of the changed settings require a reload of the application to take effect. Would you like to reload now?</p>",
                     yes: () => window.location.reload(),
-                    no: () => console.log("Reload canceled."),
+                    no: () => debugLog("Reload canceled."),
                     defaultYes: true
                 });
             }
@@ -150,22 +151,6 @@ Hooks.once('init', function() {
         }
     });
 
-    game.settings.register("sleek-chat", "showRecentMessage", {
-        name: "Show Recent Message",
-        hint: "Display the most recent chat message above the chat input area.",
-        scope: "client",
-        config: true,
-        type: Boolean,
-        default: true,
-        onChange: value => {
-            if (value) {
-                RecentMessageDisplay.init();
-            } else {
-                RecentMessageDisplay.removeContainer();
-            }
-        }
-    });
-
     game.settings.register("sleek-chat", "messageFadeOutTime", {
         name: "Message Fade Out Time (seconds)",
         hint: "Set the time in seconds for messages to fade out.",
@@ -180,7 +165,7 @@ Hooks.once('init', function() {
         default: 5,
         onChange: value => {
             // Placeholder for any immediate changes
-            console.log(`Message Fade Out Time set to: ${value} seconds`);
+            debugLog(`Message Fade Out Time set to: ${value} seconds`);
         }
     });
 
@@ -199,7 +184,7 @@ Hooks.once('init', function() {
         default: 0.5,
         onChange: value => {
             // Placeholder for any immediate changes
-            console.log(`Message Fade Out Opacity set to: ${value}`);
+            debugLog(`Message Fade Out Opacity set to: ${value}`);
         }
     });
 
@@ -218,7 +203,7 @@ Hooks.once('init', function() {
         default: 0.7,
         onChange: value => {
             // Placeholder for any immediate changes
-            console.log(`Sleek Chat Opacity set to: ${value}`);
+            debugLog(`Sleek Chat Opacity set to: ${value}`);
         }
     });
 
@@ -242,5 +227,22 @@ Hooks.once('init', function() {
             applyDiceColorFilter(value);
         }
     });
+
+        // Register the Debug Mode setting
+        game.settings.register("sleek-chat", "debugMode", {
+            name: "Enable Debug Mode",
+            hint: "If enabled, debug messages will be printed to the console.",
+            scope: "client",
+            config: true,
+            type: Boolean,
+            default: false,
+            onChange: value => {
+                if (value) {
+                    debugLog("Debug Mode enabled.");
+                } else {
+                    debugLog("Debug Mode disabled.");
+                }
+            }
+        });
 
 });

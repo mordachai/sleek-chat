@@ -1,6 +1,7 @@
+import { debugLog } from './sleek-chat-debug.js';
 export class RecentMessageDisplay {
     static init() {
-        console.log("RecentMessageDisplay: Initializing...");
+        debugLog("RecentMessageDisplay: Initializing...");
         
         // Locate existing elements in the HTML structure
         this.recentMessageContainer = document.querySelector('.recent-message-container');
@@ -17,7 +18,7 @@ export class RecentMessageDisplay {
 
         // Display the last message at startup
         if (this.messageIds.length > 0) {
-            console.log("RecentMessageDisplay: Displaying the last message on initialization.");
+            debugLog("RecentMessageDisplay: Displaying the last message on initialization.");
             this.updateRecentMessage(this.messageIds[this.currentMessageIndex]);
         }
 
@@ -29,25 +30,25 @@ export class RecentMessageDisplay {
         const messageElements = document.querySelectorAll('#chat-log li[data-message-id]');
         this.messageIds = Array.from(messageElements).map(el => el.getAttribute('data-message-id'));
         this.currentMessageIndex = this.messageIds.length - 1; // Start at the last item
-        console.log("RecentMessageDisplay: Message IDs populated:", this.messageIds);
+        debugLog("RecentMessageDisplay: Message IDs populated:", this.messageIds);
     }
 
     static hookChatLog() {
         Hooks.on('createChatMessage', (message, options, userId) => {
-            console.log("RecentMessageDisplay: New chat message detected:", message.id);
+            debugLog("RecentMessageDisplay: New chat message detected:", message.id);
             this.addMessageToHistory(message.id);
             this.updateRecentMessage(message.id); // Update the display immediately with the new message
         });
     }
 
     static setupNavigationButtons() {
-        console.log("RecentMessageDisplay: Setting up navigation buttons.");
+        debugLog("RecentMessageDisplay: Setting up navigation buttons.");
         this.prevButton.addEventListener('click', () => this.navigateMessages(-1));
         this.nextButton.addEventListener('click', () => this.navigateMessages(1));
     }
 
     static async updateRecentMessage(messageId) {
-        console.log("RecentMessageDisplay: Updating recent message with ID:", messageId);
+        debugLog("RecentMessageDisplay: Updating recent message with ID:", messageId);
         if (!this.messageDisplay) {
             console.warn("RecentMessageDisplay: messageDisplay is not defined.");
             return;
@@ -55,27 +56,27 @@ export class RecentMessageDisplay {
     
         // Clear the current content of the message-display
         this.messageDisplay.innerHTML = '';
-        console.log("RecentMessageDisplay: Cleared messageDisplay content.");
+        debugLog("RecentMessageDisplay: Cleared messageDisplay content.");
     
         // Wait a short interval before attempting to locate the new message in the DOM
         setTimeout(async () => {
             const chatLog = document.querySelector('#chat-log');
-            console.log("RecentMessageDisplay: Current chat log content:", chatLog.innerHTML);
+            debugLog("RecentMessageDisplay: Current chat log content:", chatLog.innerHTML);
     
             // Locate the corresponding li element in the chat-log
             const messageElement = document.querySelector(`#chat-log li[data-message-id="${messageId}"]`);
     
             if (messageElement) {
-                console.log("RecentMessageDisplay: Found message element:", messageElement);
+                debugLog("RecentMessageDisplay: Found message element:", messageElement);
     
                 // Ensure that the associated roll is fully evaluated
                 const message = game.messages.get(messageId);
                 if (message && message.rolls && message.rolls.length > 0) {
                     const roll = message.rolls[0];
                     if (!roll._evaluated) {
-                        console.log("RecentMessageDisplay: Roll not yet evaluated, awaiting evaluation.");
+                        debugLog("RecentMessageDisplay: Roll not yet evaluated, awaiting evaluation.");
                         await roll.evaluate({async: true});
-                        console.log("RecentMessageDisplay: Roll evaluation complete.");
+                        debugLog("RecentMessageDisplay: Roll evaluation complete.");
                     }
                 }
     
@@ -85,7 +86,7 @@ export class RecentMessageDisplay {
                 // Copy the HTML of the message
                 const messageHTML = messageElement.outerHTML;
     
-                console.log("RecentMessageDisplay: HTML to insert into messageDisplay:", messageHTML);
+                debugLog("RecentMessageDisplay: HTML to insert into messageDisplay:", messageHTML);
     
                 // Insert the HTML into the message-display
                 this.messageDisplay.innerHTML = messageHTML;
@@ -93,14 +94,16 @@ export class RecentMessageDisplay {
                 // Add class to animate the entrance
                 this.messageDisplay.classList.add('animate-slide-in');
     
-                // Set up the fade-out to start only after the animation and display time
-                const animationDuration = 2000; // Animation duration (2s)
-                setTimeout(() => {
+                // Listen for the end of the animation and then start the fade-out timer
+                this.messageDisplay.addEventListener('animationend', () => {
                     this.messageDisplay.classList.remove('animate-slide-in');
-                    RecentMessageDisplay.startFadeOutTimer(); // Start the fade-out timer after animation and display time
-                }, animationDuration);
+                    
+                    // Start the fade-out timer after the slide-in animation completes
+                    debugLog("RecentMessageDisplay: Slide-in animation completed. Starting fade-out timer.");
+                    this.startFadeOutTimer();
+                }, { once: true });
     
-                console.log("RecentMessageDisplay: Inserted HTML into messageDisplay.");
+                debugLog("RecentMessageDisplay: Inserted HTML into messageDisplay.");
     
                 this.setupHoverEffect(); // Set up the hover effect
     
@@ -112,58 +115,71 @@ export class RecentMessageDisplay {
         }, 5); // 5ms delay to ensure the DOM is updated
     }
     
-
-    static navigateMessages(direction) {
-        console.log("RecentMessageDisplay: Navigating messages with direction:", direction);
+    
+       static navigateMessages(direction) {
+        debugLog("RecentMessageDisplay: Navigating messages with direction:", direction);
         this.currentMessageIndex += direction;
         if (this.currentMessageIndex < 0) {
             this.currentMessageIndex = 0;
         } else if (this.currentMessageIndex >= this.messageIds.length) {
             this.currentMessageIndex = this.messageIds.length - 1;
         }
-
+    
         const messageId = this.messageIds[this.currentMessageIndex];
         if (messageId) {
             this.updateRecentMessage(messageId);
+    
+            // After updating the message, apply the hover effect to keep it solid
+            const container = this.recentMessageContainer;
+    
+            // Stop any ongoing fade-out and set opacity to 1.0
+            $(container).stop(true, true).css('opacity', 1.0);
+            debugLog("RecentMessageDisplay: Message opacity set to 1.0 (solid).");
+    
+            // Optionally, reset or adjust the fade-out timer if you want the message to fade out after a delay
+            this.startFadeOutTimer();
         } else {
             console.warn("RecentMessageDisplay: No message ID found for current index:", this.currentMessageIndex);
         }
     }
 
     static updateButtonStates() {
-        console.log("RecentMessageDisplay: Updating button states.");
+        debugLog("RecentMessageDisplay: Updating button states.");
         this.prevButton.disabled = this.currentMessageIndex === 0;
         this.nextButton.disabled = this.currentMessageIndex === this.messageIds.length - 1;
     }
 
     static addMessageToHistory(messageId) {
-        console.log("RecentMessageDisplay: Adding message to history with ID:", messageId);
+        debugLog("RecentMessageDisplay: Adding message to history with ID:", messageId);
         this.messageIds.push(messageId);
         if (this.messageIds.length > 50) { // Keep the last 50 messages
             this.messageIds.shift();
         }
         this.currentMessageIndex = this.messageIds.length - 1;
-        console.log("RecentMessageDisplay: Updated message history:", this.messageIds);
+        debugLog("RecentMessageDisplay: Updated message history:", this.messageIds);
     }
 
     static applyRollBackground(element, message) {
         const rollBackgroundColor = message.roll?.options?.backgroundColor || 'rgba(255, 255, 255, 1)';
         element.style.backgroundColor = rollBackgroundColor;
-        console.log("RecentMessageDisplay: Applied roll background color:", rollBackgroundColor);
+        debugLog("RecentMessageDisplay: Applied roll background color:", rollBackgroundColor);
     }
 
     static startFadeOutTimer() {
-        const fadeOutTime = game.settings.get("sleek-chat", "messageFadeOutTime") * 1000; // Convert to milliseconds
+        const fadeOutTime = game.settings.get("sleek-chat", "messageFadeOutTime") * 1000; // Convert seconds to milliseconds
         const fadeOutOpacity = game.settings.get("sleek-chat", "messageFadeOutOpacity");
     
+        // Log the value of fadeOutTime to the console
+        debugLog(`RecentMessageDisplay: Calculated fadeOutTime is ${fadeOutTime} milliseconds.`);
+    
         const container = this.recentMessageContainer; // Target the container instead of message-display
-
-        // Start the fade-out after the specified delay (after the animation has finished)
+    
+        // First, wait for the fadeOutTime delay
         setTimeout(() => {
-            console.log("RecentMessageDisplay: Starting fade out after specified delay.");
+            debugLog("RecentMessageDisplay: Starting fade out after specified delay.");
             $(container).fadeTo(1000, fadeOutOpacity); // 1 second fade-out
         }, fadeOutTime);
-    }
+    } 
 
     static setupHoverEffect() {
         const fadeOutTime = game.settings.get("sleek-chat", "messageFadeOutTime") * 1000;
@@ -174,14 +190,14 @@ export class RecentMessageDisplay {
         // Mouse enter: instantly set opacity to 1.0 and stop any ongoing fade
         container.addEventListener('mouseover', () => {
             $(container).stop(true, true).css('opacity', 1.0);
-            console.log("RecentMessageDisplay: Mouse over - container opacity set to 1.0.");
+            debugLog("RecentMessageDisplay: Mouse over - container opacity set to 1.0.");
         });
 
         // Mouse leave: start the fade-out after the specified delay
         container.addEventListener('mouseleave', () => {
             setTimeout(() => {
                 $(container).fadeTo(1000, fadeOutOpacity); // Fade-out over 1 second
-                console.log("RecentMessageDisplay: Mouse leave - reapplied fade effect to container.");
+                debugLog("RecentMessageDisplay: Mouse leave - reapplied fade effect to container.");
             }, fadeOutTime); // Delay before starting the fade
         });
     }
@@ -200,7 +216,7 @@ export class RecentMessageDisplay {
                         let chatMessage = game.messages.get(messageId);
                         if (chatMessage) {
                             await chatMessage.delete();
-                            console.log(`Message with ID ${messageId} deleted.`);
+                            debugLog(`Message with ID ${messageId} deleted.`);
                             
                             // Update the display after deletion
                             this.removeMessageFromDisplay(messageId);
@@ -226,7 +242,7 @@ export class RecentMessageDisplay {
         } else {
             // If no messages are left, clear the message display
             this.messageDisplay.innerHTML = '';
-            console.log("RecentMessageDisplay: No messages left to display.");
+            debugLog("RecentMessageDisplay: No messages left to display.");
         }
 
         // Update the state of navigation buttons
@@ -239,13 +255,13 @@ export class RecentMessageDisplay {
 
         // Start the fade-out effect after the specified delay
         setTimeout(() => {
-            console.log("RecentMessageDisplay: Starting fade out after specified delay.");
+            debugLog("RecentMessageDisplay: Starting fade out after specified delay.");
             $(element).fadeTo(1000, fadeOutOpacity); // 1 second fade-out
         }, fadeOutTime);
     }
 
     static applyMessageFadeOutSettings() {
-        console.log("RecentMessageDisplay: Applying message fade out settings.");
+        debugLog("RecentMessageDisplay: Applying message fade out settings.");
         const messageElements = document.querySelectorAll('.recent-message');
         messageElements.forEach(element => {
             // Reapply the fade-out effect with updated settings

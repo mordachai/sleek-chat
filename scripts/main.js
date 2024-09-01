@@ -1,3 +1,4 @@
+import { debugLog } from './sleek-chat-debug.js';
 import './settings.js';
 import { RecentMessageDisplay } from './recent-message-display.js';
 import { updateDragAndDropState } from './drag-drop.js';
@@ -11,14 +12,14 @@ export function applyNavButtonHiding() {
         const isGM = game.user.isGM;
         const isCollapsed = document.getElementById('sidebar').classList.contains('collapsed');
 
-        console.log(`"Apply only to Players" is set to: ${hideForPlayersOnly}`);
-        console.log(`Current user is GM: ${isGM}`);
-        console.log(`"Hide Always" is set to: ${hideAll}`);
-        console.log(`Sidebar is collapsed: ${isCollapsed}`);
+        debugLog(`"Apply only to Players" is set to: ${hideForPlayersOnly}`);
+        debugLog(`Current user is GM: ${isGM}`);
+        debugLog(`"Hide Always" is set to: ${hideAll}`);
+        debugLog(`Sidebar is collapsed: ${isCollapsed}`);
 
         // Skip hiding logic if the user is a GM and "Apply only to Players" is true
         if (isGM && hideForPlayersOnly) {
-            console.log("Hiding is skipped because 'Apply only to Players' is true and the current user is a GM.");
+            debugLog("Hiding is skipped because 'Apply only to Players' is true and the current user is a GM.");
             return;
         }
 
@@ -40,21 +41,21 @@ export function applyNavButtonHiding() {
             const button = buttons[key];
             const hideSetting = game.settings.get("sleek-chat", `hide${key.charAt(0).toUpperCase() + key.slice(1)}`);
 
-            console.log(`Checkbox for "${key}" is set to: ${hideSetting}`);
+            debugLog(`Checkbox for "${key}" is set to: ${hideSetting}`);
 
             if (button) {
                 if (hideAll && hideSetting) {
                     // Hide if "Hide Always" is enabled and the setting for the menu is true
                     button.style.display = "none";
-                    console.log(`Menu "${key}" is hidden due to "Hide Always" setting.`);
+                    debugLog(`Menu "${key}" is hidden due to "Hide Always" setting.`);
                 } else if (!hideAll && isCollapsed && hideSetting) {
                     // Hide if sidebar is collapsed and the individual setting is true
                     button.style.display = "none";
-                    console.log(`Menu "${key}" is hidden because the sidebar is collapsed and the setting is enabled.`);
+                    debugLog(`Menu "${key}" is hidden because the sidebar is collapsed and the setting is enabled.`);
                 } else {
                     // Show the menu in other cases
                     button.style.display = "";
-                    console.log(`Menu "${key}" is shown based on sidebar state or "Hide Always" being disabled.`);
+                    debugLog(`Menu "${key}" is shown based on sidebar state or "Hide Always" being disabled.`);
                 }
             }
         });
@@ -106,13 +107,13 @@ export function synchronizePlayerSettings() {
 
 // Hook to render the custom Sleek Chat UI on Chat Log render
 Hooks.on("renderChatLog", async (app, html, data) => {
-    console.log("renderChatLog: Starting to render Sleek Chat UI for all users.");
+    debugLog("renderChatLog: Starting to render Sleek Chat UI for all users.");
 
     const templatePath = "modules/sleek-chat/templates/dice-toolbar.html";
     const users = game.users.filter(user => user.id !== game.user.id);
     const toolbarHTML = await renderTemplate(templatePath, { users });
 
-    console.log("Toolbar HTML generated. Appending to body.");
+    debugLog("Toolbar HTML generated. Appending to body.");
     $('body').append(toolbarHTML);
 
     // Add the event listener for Enter key press in the chat input
@@ -161,7 +162,7 @@ Hooks.on("renderChatLog", async (app, html, data) => {
     if (hideAdvDisadv) {
         $('#advantage-toggle').hide();
         $('#disadvantage-toggle').hide();
-        console.log("Advantage/Disadvantage buttons are hidden");
+        debugLog("Advantage/Disadvantage buttons are hidden");
     }
 
     const updateVisibility = () => {
@@ -172,19 +173,19 @@ Hooks.on("renderChatLog", async (app, html, data) => {
         const navButtonsContainer = document.querySelector('.nav-buttons-container');
         const sleekChatContainer = document.querySelector('.sleek-chat-container');
 
-        console.log("Sidebar is collapsed:", isCollapsed);
+        debugLog("Sidebar is collapsed:", isCollapsed);
 
         if (toolbar) {
             toolbar.style.display = isCollapsed ? 'flex' : 'none';
-            console.log("Toolbar visibility set to:", isCollapsed ? 'flex' : 'none');
+            debugLog("Toolbar visibility set to:", isCollapsed ? 'flex' : 'none');
         }
         if (recentMessageContainer) {
             recentMessageContainer.style.display = isCollapsed ? 'block' : 'none';
-            console.log("Recent message container visibility set to:", isCollapsed ? 'block' : 'none');
+            debugLog("Recent message container visibility set to:", isCollapsed ? 'block' : 'none');
         }
         if (navButtonsContainer) {
             navButtonsContainer.style.display = isCollapsed ? 'flex' : 'none';
-            console.log("Nav buttons container visibility set to:", isCollapsed ? 'flex' : 'none');
+            debugLog("Nav buttons container visibility set to:", isCollapsed ? 'flex' : 'none');
         }
         if (sleekChatContainer) {
             sleekChatContainer.style.display = isCollapsed ? 'block' : 'none';
@@ -272,9 +273,9 @@ Hooks.on("renderChatLog", async (app, html, data) => {
         let rollFormula = rolls.join(" + ") + (modifier !== 0 ? ` + ${modifier}` : "");
         const roll = new Roll(rollFormula, {}, {backgroundColor: 'rgba(128, 128, 255, 0.2)'}); // Example background color
     
-        console.log("Evaluating roll formula:", rollFormula);
+        debugLog("Evaluating roll formula:", rollFormula);
         await roll.evaluate({async: true});  // Ensure roll is fully evaluated before proceeding
-        console.log("Roll evaluation complete. Total result:", roll.total);
+        debugLog("Roll evaluation complete. Total result:", roll.total);
 
         const templateData = {
             title: "Dice Roll",
@@ -288,7 +289,7 @@ Hooks.on("renderChatLog", async (app, html, data) => {
 
         const content = await renderTemplate("modules/sleek-chat/templates/common-roll.hbs", templateData);
 
-        console.log("Creating chat message with content:", content);
+        debugLog("Creating chat message with content:", content);
 
         // Create and insert the chat message
         const chatMessage = await ChatMessage.create({
@@ -300,7 +301,7 @@ Hooks.on("renderChatLog", async (app, html, data) => {
             roll  // Include the roll in the message data
         });
 
-        console.log("Chat message created successfully.");
+        debugLog("Chat message created successfully.");
         
         // Update the RecentMessageDisplay with the new message ID
         RecentMessageDisplay.updateRecentMessage(chatMessage.id);
@@ -327,13 +328,13 @@ Hooks.on("renderChatLog", async (app, html, data) => {
 
 // Hook to run when Foundry VTT is fully ready
 Hooks.on('ready', () => {
-    console.log("Foundry VTT is ready.");
+    debugLog("Foundry VTT is ready.");
     applyNavButtonHiding();
 
     // Apply Sleek Chat Opacity
     const sleekChatOpacity = game.settings.get("sleek-chat", "sleekChatOpacity");
     $('.sleek-chat').css('opacity', sleekChatOpacity);
-    console.log("Sleek Chat Opacity set to:", sleekChatOpacity);
+    debugLog("Sleek Chat Opacity set to:", sleekChatOpacity);
 
     // Apply the dice color filter on startup
     const diceColorFilter = game.settings.get("sleek-chat", "diceColorFilter");
@@ -346,19 +347,18 @@ Hooks.on('ready', () => {
     if (hideAdvDisadv) {
         $('#advantage-toggle').hide();
         $('#disadvantage-toggle').hide();
-        console.log("Advantage/Disadvantage buttons are hidden");
+        debugLog("Advantage/Disadvantage buttons are hidden");
     }
 
     const hideTotalResult = game.settings.get("sleek-chat", "hideTotalResult");
     if (hideTotalResult) {
-        console.log("Total result is hidden");
+        debugLog("Total result is hidden");
     }
 
     // Initialize the RecentMessageDisplay if enabled
-    if (game.settings.get("sleek-chat", "showRecentMessage")) {
-        console.log("Initializing RecentMessageDisplay.");
-        RecentMessageDisplay.init();
-    }
+    console.log("Initializing RecentMessageDisplay.");
+    RecentMessageDisplay.init();
+    
 });
 
 // Function to apply dice color filter based on settings
@@ -388,5 +388,5 @@ export function applyDiceColorFilter(color) {
             filter = "none"; // No filter for white
     }
     document.documentElement.style.setProperty('--dice-filter', filter);
-    console.log(`Dice color filter applied: ${color}`);
+    debugLog(`Dice color filter applied: ${color}`);
 }
