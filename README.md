@@ -6,22 +6,21 @@
 
 ![image](https://github.com/user-attachments/assets/c39f24ce-467d-4593-bcde-156685089401)
 
+Check the video on YouTube: https://www.youtube.com/watch?v=c95AF7TEV7E
+
 ## Installation
 
-To install this module, follow these steps:
+In Foundry VTT, go to the Add-on Modules tab and click Install Module
 
-1. Search in the top bar for "sleek chat"
-2. Click **Install**
-3. Enable the module in your **Game Settings** under **Manage Modules**
+1. Search in the top bar for "sleek chat" and click on the Install button of the module
+2. Enable the module in your Game Settings under Manage Modules
 
 OR
 
-1. In Foundry VTT, go to the **Add-on Modules** tab
-2. Click **Install Module**
-3. Paste the following manifest URL into the bottom **Manifest URL** field:
-
+1. Paste the following manifest URL into the bottom Manifest URL field:
 https://github.com/mordachai/sleek-chat/raw/main/module.json
 
+2. Enable the module in your Game Settings under Manage Modules
 
 ## Usage and Settings
 
