@@ -204,21 +204,19 @@ export class RecentMessageDisplay {
     
     static setupDeleteFunctionality() {
         const container = this.recentMessageContainer;
-        
-        // Event delegation: listen for clicks on delete buttons within the container
+    
+        // Event delegation: listen for clicks on delete buttons and other buttons within the container
         container.addEventListener('click', async (event) => {
+            // Handle delete button clicks
             if (event.target.closest('.message-delete')) {
                 const messageElement = event.target.closest('li[data-message-id]');
                 if (messageElement) {
                     const messageId = messageElement.getAttribute('data-message-id');
                     try {
-                        // Use Foundry VTT API to delete the message
                         let chatMessage = game.messages.get(messageId);
                         if (chatMessage) {
                             await chatMessage.delete();
                             debugLog(`Message with ID ${messageId} deleted.`);
-                            
-                            // Update the display after deletion
                             this.removeMessageFromDisplay(messageId);
                         }
                     } catch (error) {
@@ -226,7 +224,52 @@ export class RecentMessageDisplay {
                     }
                 }
             }
+            // Handle other button clicks within the chat message
+            else if (event.target.closest('.chat-message button')) {
+                const messageElement = event.target.closest('li[data-message-id]');
+                if (messageElement) {
+                    const messageId = messageElement.getAttribute('data-message-id');
+                    const chatMessage = game.messages.get(messageId);
+                    if (chatMessage) {
+                        // Call the appropriate function for the button click
+                        await this.handleButtonClick(chatMessage, event.target);
+                    }
+                }
+            }
         });
+    }
+    
+    static async handleButtonClick(chatMessage, buttonElement) {
+        // Get the button's attributes
+        const buttonAction = buttonElement.dataset.action;
+        const buttonSystem = buttonElement.dataset.system;
+    
+        // Check if there's a system-specific function to handle the button click
+        const systemHandlerFunction = `handle${buttonSystem}ButtonClick`;
+        if (typeof this[systemHandlerFunction] === 'function') {
+            await this[systemHandlerFunction](chatMessage, buttonElement);
+        } else {
+            // Fallback to a generic button click handler
+            await this.handleGenericButtonClick(chatMessage, buttonElement);
+        }
+    }
+    
+    static async handleGenericButtonClick(chatMessage, buttonElement) {
+        // Implement a generic button click handler
+        // You can log the button's attributes or perform some default action
+        debugLog('Button clicked:', buttonElement.dataset);
+    }
+    
+    static async handleMySystemButtonClick(chatMessage, buttonElement) {
+        // Implement the logic to handle a button click from the "MySystem" system
+        const mySystemModule = game.modules.get('my-system');
+        await mySystemModule.handleButtonClick(chatMessage, buttonElement);
+    }
+    
+    static async handleAnotherSystemButtonClick(chatMessage, buttonElement) {
+        // Implement the logic to handle a button click from the "AnotherSystem" system
+        const anotherSystemModule = game.modules.get('another-system');
+        await anotherSystemModule.handleButtonClick(chatMessage, buttonElement);
     }
 
     static removeMessageFromDisplay(deletedMessageId) {

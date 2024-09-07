@@ -3,6 +3,45 @@ import './settings.js';
 import { RecentMessageDisplay } from './recent-message-display.js';
 import { updateDragAndDropState } from './drag-drop.js';
 
+function parseDiceRanges() {
+    const ranges = {};
+
+    function parseRange(setting) {
+        const rangeStr = game.settings.get("sleek-chat", setting);
+        return rangeStr.split(';').map(range => {
+            const [low, high] = range.split('-').map(Number);
+            return {
+                min: isNaN(high) ? low : Math.min(low, high),
+                max: isNaN(high) ? low : Math.max(low, high)
+            };
+        });
+    }
+
+    ranges.d4 = parseRange("d4ResultRanges");
+    ranges.d6 = parseRange("d6ResultRanges");
+    ranges.d8 = parseRange("d8ResultRanges");
+    ranges.d10 = parseRange("d10ResultRanges");
+    ranges.d12 = parseRange("d12ResultRanges");
+    ranges.d20 = parseRange("d20ResultRanges");
+    ranges.d100 = parseRange("d100ResultRanges");
+    // Add similar entries for other dice types (d10, d12, d20, etc.)
+
+    return ranges;
+}
+
+function getResultClass(result, ranges) {
+    if (result >= ranges[0].min && result <= ranges[0].max) {
+        return 'fumble';
+    } else if (result >= ranges[1].min && result <= ranges[1].max) {
+        return 'normal';
+    } else if (result >= ranges[2].min && result <= ranges[2].max) {
+        return 'critical';
+    }
+    return '';
+}
+
+
+
 // Function to apply navigation button hiding based on settings
 export function applyNavButtonHiding() {
     const hideAll = game.settings.get("sleek-chat", "hideNavButtonsAll");
@@ -110,7 +149,7 @@ Hooks.on("renderChatLog", async (app, html, data) => {
     debugLog("renderChatLog: Starting to render Sleek Chat UI for all users.");
 
     const templatePath = "modules/sleek-chat/templates/dice-toolbar.html";
-    const users = game.users.filter(user => user.id !== game.user.id);
+    const users = game.users.filter(user => user.active && user.id !== game.user.id);
     const toolbarHTML = await renderTemplate(templatePath, { users });
 
     debugLog("Toolbar HTML generated. Appending to body.");
@@ -250,7 +289,7 @@ Hooks.on("renderChatLog", async (app, html, data) => {
 
     $('#roll-dice').click(async () => {
         let rolls = [];
-    
+        // Build roll formula based on user input
         for (let dice in selectedDiceCounts) {
             let count = selectedDiceCounts[dice];
             if (count > 0) {
@@ -263,50 +302,67 @@ Hooks.on("renderChatLog", async (app, html, data) => {
                 }
             }
         }
-    
         if (rolls.length === 0) {
             ui.notifications.warn("Please select at least one die to roll.");
             return;
         }
-    
+        // Prepare the roll formula
         const modifier = parseInt($('#modifier').val()) || 0;
         let rollFormula = rolls.join(" + ") + (modifier !== 0 ? ` + ${modifier}` : "");
-        const roll = new Roll(rollFormula, {}, {backgroundColor: 'rgba(128, 128, 255, 0.2)'}); // Example background color
+        const roll = new Roll(rollFormula);
+        debugLog("Roll formula created:", rollFormula);
     
-        debugLog("Evaluating roll formula:", rollFormula);
-        await roll.evaluate({async: true});  // Ensure roll is fully evaluated before proceeding
-        debugLog("Roll evaluation complete. Total result:", roll.total);
-
+        // Evaluate the roll
+        await roll.evaluate({async: true});
+    
+        // Use Dice So Nice for visualization if available
+        if (game.dice3d) {
+            await game.dice3d.showForRoll(roll, game.user, true);
+            debugLog("Dice So Nice roll complete.");
+        }
+    
+        // Fetch the dice ranges
+        const diceRanges = parseDiceRanges();
+    
+        // Prepare data for Handlebars template
+        const diceTerms = roll.terms.filter(term => term instanceof Die);
         const templateData = {
-            title: "Dice Roll",
-            description: `Rolling ${rollFormula}`,
-            diceResults: roll.terms
-                .filter(term => term instanceof Die)
-                .flatMap(term => term.results.map(r => r.result))
-                .join(", "),
-            total: hideTotalResult ? null : roll.total
+            roll: {
+                formula: rollFormula,
+                terms: diceTerms.map(term => {
+                    const diceType = `d${term.faces}`;
+                    const ranges = diceRanges[diceType] || [];
+                    return {
+                        faces: term.faces,
+                        results: term.results.map(result => {
+                            const resultClass = ranges.length > 0 ? getResultClass(result.result, ranges) : '';
+                            return {
+                                value: result.result,
+                                class: resultClass
+                            };
+                        })
+                    };
+                }),
+                total: hideTotalResult ? null : roll.total
+            }
         };
-
+        debugLog("Template data prepared:", templateData);
+    
+        // Render and send the chat message
         const content = await renderTemplate("modules/sleek-chat/templates/common-roll.hbs", templateData);
-
         debugLog("Creating chat message with content:", content);
-
-        // Create and insert the chat message
-        const chatMessage = await ChatMessage.create({
-            user: game.user._id,
+    
+        // Create the chat message
+        await ChatMessage.create({
+            user: game.user.id,
             speaker: ChatMessage.getSpeaker(),
             content: content,
-            rolls: [roll],
-            type: CONST.CHAT_MESSAGE_STYLES.ROLL,
-            roll  // Include the roll in the message data
+            roll: roll,
+            type: CONST.CHAT_MESSAGE_TYPES.ROLL
         });
-
         debugLog("Chat message created successfully.");
-        
-        // Update the RecentMessageDisplay with the new message ID
-        RecentMessageDisplay.updateRecentMessage(chatMessage.id);
-
-        // Reset the dice selection and UI
+    
+        // Reset dice selection and UI
         selectedDiceCounts = {};
         $('.dice-count').text("0").hide();
         $('#modifier').val(0);
@@ -315,7 +371,20 @@ Hooks.on("renderChatLog", async (app, html, data) => {
         $('#advantage-toggle').removeClass("active");
         $('#disadvantage-toggle').removeClass("active");
     });
-
+      
+    function getResultClass(result, ranges) {
+        if (result >= ranges[0].min && result <= ranges[0].max) {
+            return 'fumble';
+        } else if (result >= ranges[1].min && result <= ranges[1].max) {
+            return 'normal';
+        } else if (result >= ranges[2].min && result <= ranges[2].max) {
+            return 'critical';
+        }
+        return '';
+    }
+    
+    
+    
     function updateDiceCount(dice, count) {
         const countElement = $(`.dice-count[data-dice="${dice}"]`);
         if (count > 0) {

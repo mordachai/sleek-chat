@@ -228,21 +228,105 @@ Hooks.once('init', function() {
         }
     });
 
-        // Register the Debug Mode setting
-        game.settings.register("sleek-chat", "debugMode", {
-            name: "Enable Debug Mode",
-            hint: "If enabled, debug messages will be printed to the console.",
-            scope: "client",
-            config: true,
-            type: Boolean,
-            default: false,
-            onChange: value => {
-                if (value) {
-                    debugLog("Debug Mode enabled.");
-                } else {
-                    debugLog("Debug Mode disabled.");
-                }
+    game.settings.register("sleek-chat", "d4ResultRanges", {
+        name: "d4 Result Ranges",
+        hint: "Enter the fumble, normal, and critical ranges for d4 (e.g., '1;2-3;4').",
+        scope: "world",
+        config: true,
+        type: String,
+        default: "1;2-3;4",
+        onChange: value => {
+            debugLog("Updated d4 result ranges:", value);
+        }
+    });
+    
+    game.settings.register("sleek-chat", "d6ResultRanges", {
+        name: "d6 Result Ranges",
+        hint: "Enter the fumble, normal, and critical ranges for d6 (e.g., '1;2-5;6').",
+        scope: "world",
+        config: true,
+        type: String,
+        default: "1;2-5;6",
+        onChange: value => {
+            debugLog("Updated d6 result ranges:", value);
+        }
+    });
+    
+    game.settings.register("sleek-chat", "d8ResultRanges", {
+        name: "d8 Result Ranges",
+        hint: "Enter the fumble, normal, and critical ranges for d8 (e.g., '1-2;3-6;7-8').",
+        scope: "world",
+        config: true,
+        type: String,
+        default: "1;2-7;8",
+        onChange: value => {
+            debugLog("Updated d8 result ranges:", value);
+        }
+    });
+
+    game.settings.register("sleek-chat", "d10ResultRanges", {
+        name: "d10 Result Ranges",
+        hint: "Enter the fumble, normal, and critical ranges for d4 (e.g., '1;2-9;10').",
+        scope: "world",
+        config: true,
+        type: String,
+        default: "1;2-9;10",
+        onChange: value => {
+            debugLog("Updated d10 result ranges:", value);
+        }
+    });
+    
+    game.settings.register("sleek-chat", "d12ResultRanges", {
+        name: "d12 Result Ranges",
+        hint: "Enter the fumble, normal, and critical ranges for d6 (e.g., '1;2-11;12').",
+        scope: "world",
+        config: true,
+        type: String,
+        default: "1;2-11;12",
+        onChange: value => {
+            debugLog("Updated d12 result ranges:", value);
+        }
+    });
+    
+    game.settings.register("sleek-chat", "d20ResultRanges", {
+        name: "d20 Result Ranges",
+        hint: "Enter the fumble, normal, and critical ranges for d8 (e.g., '1;2-9;20').",
+        scope: "world",
+        config: true,
+        type: String,
+        default: "1;2-9;20",
+        onChange: value => {
+            debugLog("Updated d20 result ranges:", value);
+        }
+    });
+
+    game.settings.register("sleek-chat", "d100ResultRanges", {
+        name: "d100 Result Ranges",
+        hint: "Enter the fumble, normal, and critical ranges for d8 (e.g., '1-5;6-94;95-100').",
+        scope: "world",
+        config: true,
+        type: String,
+        default: "1-5;6-94;95-100",
+        onChange: value => {
+            debugLog("Updated d100 result ranges:", value);
+        }
+    });
+
+    // Register the Debug Mode setting
+    game.settings.register("sleek-chat", "debugMode", {
+        name: "Enable Debug Mode",
+        hint: "If enabled, debug messages will be printed to the console.",
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: false,
+        onChange: value => {
+            if (value) {
+                debugLog("Debug Mode enabled.");
+            } else {
+                debugLog("Debug Mode disabled.");
             }
-        });
+        }
+    });
 
 });

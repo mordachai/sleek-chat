@@ -276,3 +276,87 @@
     border-top-right-radius: 5px;
     color: #d6d6d6c8;
 }
+
+
+/*DICE RESULTS*/
+
+/* Dice result container */
+.roll-result {
+    display: flex;
+    flex-direction: column; /* Stack title and total vertically */
+    justify-content: flex-start;
+}
+
+.roll-formula{
+    font-size: small;
+    text-align: left;
+}
+
+.dice-results {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    border: 1px solid #4b4e52;
+    border-radius: 4px;
+    gap: 3px;
+    margin: auto;
+    padding: 5px;
+    overflow: hidden;
+  }
+
+/* Individual dice result */
+.dice-result {
+    width: 30px;
+    height: 30px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2px;
+    border: none;
+  }
+  
+  /* Set background for different dice types */
+  .dice-4  { background-image: url('../ui/d4-fill.svg'); }
+  .dice-6  { background-image: url('../ui/d6-fill.svg'); }
+  .dice-8  { background-image: url('../ui/d8-fill.svg'); }
+  .dice-10 { background-image: url('../ui/d10-fill.svg'); }
+  .dice-12 { background-image: url('../ui/d12-fill.svg'); }
+  .dice-20 { background-image: url('../ui/d20-fill.svg'); }
+  .dice-100 { background-image: url('../ui/d100-fill.svg'); }
+  
+  /* Style for the number inside the dice */
+  .dice-number {
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    font-family: var(--font-body);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .roll-total{
+    font-family: var(--font-body);
+    font-size: xx-large;
+    margin: 5px;
+    text-align: center;
+    font-weight: 900;
+  }
+
+  /* Fumble result */
+.dice-number.fumble {
+    color: rgb(248, 35, 35);
+}
+
+/* Normal result */
+.dice-number.normal {
+    color: white;
+}
+
+/* Critical result */
+.dice-number.critical {
+    color: rgb(21, 247, 21);
+}
+
+  

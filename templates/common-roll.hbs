@@ -1,8 +1,17 @@
 <div class="roll-result">
-  <h3>{{title}}</h3>
-  <p>{{description}}</p>
-  <p><strong>Results:</strong> {{diceResults}}</p>
-  {{#if total}}
-    <p><strong>Total:</strong> {{total}}</p>
+  <p class="roll-formula">{{roll.formula}}</p>
+
+  <div class="dice-results">
+    {{#each roll.terms as |term|}}
+      {{#each term.results as |result|}}
+        <div class="dice-result dice-{{term.faces}}">
+          <span class="dice-number {{result.class}}">{{result.value}}</span>
+        </div>
+      {{/each}}
+    {{/each}}
+  </div>
+
+  {{#if roll.total}}
+    <p class="roll-total">{{roll.total}}</p>
   {{/if}}
 </div>
