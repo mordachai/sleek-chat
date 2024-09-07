@@ -266,7 +266,7 @@ Hooks.once('init', function() {
 
     game.settings.register("sleek-chat", "d10ResultRanges", {
         name: "d10 Result Ranges",
-        hint: "Enter the fumble, normal, and critical ranges for d4 (e.g., '1;2-9;10').",
+        hint: "Enter the fumble, normal, and critical ranges for d10 (e.g., '1;2-9;10').",
         scope: "world",
         config: true,
         type: String,
@@ -278,7 +278,7 @@ Hooks.once('init', function() {
     
     game.settings.register("sleek-chat", "d12ResultRanges", {
         name: "d12 Result Ranges",
-        hint: "Enter the fumble, normal, and critical ranges for d6 (e.g., '1;2-11;12').",
+        hint: "Enter the fumble, normal, and critical ranges for d12 (e.g., '1;2-11;12').",
         scope: "world",
         config: true,
         type: String,
@@ -290,7 +290,7 @@ Hooks.once('init', function() {
     
     game.settings.register("sleek-chat", "d20ResultRanges", {
         name: "d20 Result Ranges",
-        hint: "Enter the fumble, normal, and critical ranges for d8 (e.g., '1;2-9;20').",
+        hint: "Enter the fumble, normal, and critical ranges for d20 (e.g., '1;2-9;20').",
         scope: "world",
         config: true,
         type: String,
@@ -302,7 +302,7 @@ Hooks.once('init', function() {
 
     game.settings.register("sleek-chat", "d100ResultRanges", {
         name: "d100 Result Ranges",
-        hint: "Enter the fumble, normal, and critical ranges for d8 (e.g., '1-5;6-94;95-100').",
+        hint: "Enter the fumble, normal, and critical ranges for d100 (e.g., '1-5;6-94;95-100').",
         scope: "world",
         config: true,
         type: String,
