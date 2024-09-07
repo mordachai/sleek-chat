@@ -31,10 +31,10 @@ https://github.com/mordachai/sleek-chat/raw/main/module.json
 - **Hide Always:** Keep the selected menus hidden even when the sidebar is expanded.
 - **Apply only to Players:** Hide navigation buttons only for non-GM users, while you keep seeing everything.
 - **Dice Color:** Choose from various color options for the dice icons (white, red, green, cyan, blue, pink, yellow).
-- **dx Result Ranges:** Enter the fumble, normal, and critical ranges for the die roll on the chat.Example:
-    - _PbtA systems:_ set the D6s to  "1-3; 4-5; 6" to represent the fail, partial success, and success results.
-    - _Call of Cthulhu:_ set the D100 to "96-100; 2-95;1" to correctly represent the system results.
-    - If you don't want colors you can set the die as "0; range-total; 0", e.g.: D8: "0;1-8;0". This way all D8s rolls will have a white color.
+- **dx Result Ranges:** Enter the fumble, normal, and critical ranges for the die roll on the chat. Example:
+    - _**PbtA systems:**_ set the D6s to "1-3; 4-5; 6" to represent the fail, partial success, and success results.
+    - _**Call of Cthulhu:**_ set the D100 to "96-100; 2-95;1" to correctly represent the system results.
+    - If you don't want colors you can set the die as "0; range-total; 0", e.g. for the D8: "0;1-8;0". This way all D8s rolls will have a white color.
 
 ### Message Display
 
