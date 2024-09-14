@@ -40,8 +40,6 @@ function getResultClass(result, ranges) {
     return '';
 }
 
-
-
 // Function to apply navigation button hiding based on settings
 export function applyNavButtonHiding() {
     const hideAll = game.settings.get("sleek-chat", "hideNavButtonsAll");
@@ -62,40 +60,27 @@ export function applyNavButtonHiding() {
             return;
         }
 
-        const buttons = {
-            chat: document.querySelector('[data-tab="chat"]'),
-            combat: document.querySelector('[data-tab="combat"]'),
-            scenes: document.querySelector('[data-tab="scenes"]'),
-            actors: document.querySelector('[data-tab="actors"]'),
-            items: document.querySelector('[data-tab="items"]'),
-            journal: document.querySelector('[data-tab="journal"]'),
-            tables: document.querySelector('[data-tab="tables"]'),
-            cards: document.querySelector('[data-tab="cards"]'),
-            playlists: document.querySelector('[data-tab="playlists"]'),
-            compendium: document.querySelector('[data-tab="compendium"]'),
-            settings: document.querySelector('[data-tab="settings"]'),
-        };
+        // Get all sidebar navigation buttons
+        const buttons = document.querySelectorAll('#sidebar-tabs > .item');
 
-        Object.keys(buttons).forEach(key => {
-            const button = buttons[key];
-            const hideSetting = game.settings.get("sleek-chat", `hide${key.charAt(0).toUpperCase() + key.slice(1)}`);
+        buttons.forEach(button => {
+            const tabName = button.dataset.tab;
+            const hideSetting = game.settings.get("sleek-chat", `hide${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
 
-            debugLog(`Checkbox for "${key}" is set to: ${hideSetting}`);
+            debugLog(`Checkbox for "${tabName}" is set to: ${hideSetting}`);
 
-            if (button) {
-                if (hideAll && hideSetting) {
-                    // Hide if "Hide Always" is enabled and the setting for the menu is true
-                    button.style.display = "none";
-                    debugLog(`Menu "${key}" is hidden due to "Hide Always" setting.`);
-                } else if (!hideAll && isCollapsed && hideSetting) {
-                    // Hide if sidebar is collapsed and the individual setting is true
-                    button.style.display = "none";
-                    debugLog(`Menu "${key}" is hidden because the sidebar is collapsed and the setting is enabled.`);
-                } else {
-                    // Show the menu in other cases
-                    button.style.display = "";
-                    debugLog(`Menu "${key}" is shown based on sidebar state or "Hide Always" being disabled.`);
-                }
+            if (hideAll && hideSetting) {
+                // Hide if "Hide Always" is enabled and the setting for the menu is true
+                button.style.display = "none";
+                debugLog(`Menu "${tabName}" is hidden due to "Hide Always" setting.`);
+            } else if (!hideAll && isCollapsed && hideSetting) {
+                // Hide if sidebar is collapsed and the individual setting is true
+                button.style.display = "none";
+                debugLog(`Menu "${tabName}" is hidden because the sidebar is collapsed and the setting is enabled.`);
+            } else {
+                // Show the menu in other cases
+                button.style.display = "";
+                debugLog(`Menu "${tabName}" is shown based on sidebar state or "Hide Always" being disabled.`);
             }
         });
 
@@ -115,6 +100,28 @@ export function applyNavButtonHiding() {
 
     // Handle the case when settings are changed
     Hooks.on('updateSetting', updateButtonVisibility);
+}
+
+// Function to create settings for new sidebar tabs
+export function createDynamicSidebarSettings() {
+    const buttons = document.querySelectorAll('#sidebar-tabs > .item');
+    
+    buttons.forEach(button => {
+        const tabName = button.dataset.tab;
+        const settingKey = `hide${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`;
+        
+        if (!game.settings.settings.get(`sleek-chat.${settingKey}`)) {
+            game.settings.register("sleek-chat", settingKey, {
+                name: `Hide ${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`,
+                hint: `Hide the ${tabName} tab in the sidebar`,
+                scope: "world",
+                config: true,
+                type: Boolean,
+                default: false,
+                onChange: () => applyNavButtonHiding()
+            });
+        }
+    });
 }
 
 // Function to synchronize player settings with GM settings
@@ -143,6 +150,25 @@ export function synchronizePlayerSettings() {
 
     applyNavButtonHiding();
 }
+
+// Function to play the ping sound
+function playPingSound() {
+    const enablePingSound = game.settings.get("sleek-chat", "enablePingSound");
+    if (!enablePingSound) return;
+
+    const pingSoundPath = game.settings.get("sleek-chat", "pingSoundPath") || "modules/sleek-chat/ui/chat-ping.ogg";
+    const audio = new Audio(pingSoundPath);
+    audio.volume = 0.5; // You can adjust this or make it configurable
+    audio.play().catch(e => console.error("Error playing ping sound:", e));
+}
+
+// Modify the existing hook for new chat messages
+Hooks.on('createChatMessage', (message, options, userId) => {
+    debugLog("New chat message detected:", message.id);
+    RecentMessageDisplay.addMessageToHistory(message.id);
+    RecentMessageDisplay.updateRecentMessage(message.id);
+    playPingSound(); // Add this line to play the ping sound
+});
 
 // Hook to render the custom Sleek Chat UI on Chat Log render
 Hooks.on("renderChatLog", async (app, html, data) => {
@@ -398,6 +424,7 @@ Hooks.on("renderChatLog", async (app, html, data) => {
 // Hook to run when Foundry VTT is fully ready
 Hooks.on('ready', () => {
     debugLog("Foundry VTT is ready.");
+    createDynamicSidebarSettings();
     applyNavButtonHiding();
 
     // Apply Sleek Chat Opacity
@@ -427,6 +454,13 @@ Hooks.on('ready', () => {
     // Initialize the RecentMessageDisplay if enabled
     console.log("Initializing RecentMessageDisplay.");
     RecentMessageDisplay.init();
+    
+    // Initialize ping sound
+    const pingSoundPath = game.settings.get("sleek-chat", "pingSoundPath");
+    if (pingSoundPath) {
+        const audio = new Audio(pingSoundPath);
+        audio.load(); // Preload the audio file
+    }
     
 });
 

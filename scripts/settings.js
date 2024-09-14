@@ -39,6 +39,25 @@ Hooks.once('init', function() {
         });
     });
 
+    game.settings.register("sleek-chat", "enablePingSound", {
+        name: "Enable Ping Sound in chat",
+        hint: "Play a sound when a new message is displayed on chat",
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: false
+    });
+
+    game.settings.register("sleek-chat", "pingSoundPath", {
+        name: "Ping Sound File",
+        hint: "Choose a custom sound file for the ping (leave empty for default)",
+        scope: "client",
+        config: true,
+        type: String,
+        default: "modules/sleek-chat/ui/chat-ping.ogg",
+        filePicker: "audio"
+    });
+
     // Register other settings without forcing a reload
     game.settings.register("sleek-chat", "hideChat", {
         name: "Hide Chat Messages",
