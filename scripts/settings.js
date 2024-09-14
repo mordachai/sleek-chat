@@ -40,8 +40,8 @@ Hooks.once('init', function() {
     });
 
     game.settings.register("sleek-chat", "enablePingSound", {
-        name: "Enable Ping Sound in chat",
-        hint: "Play a sound when a new message is displayed on chat",
+        name: "Enable Sound Notification",
+        hint: "Play a sound notification when a new message is displayed on chat",
         scope: "client",
         config: true,
         type: Boolean,
@@ -50,7 +50,7 @@ Hooks.once('init', function() {
 
     game.settings.register("sleek-chat", "pingSoundPath", {
         name: "Ping Sound File",
-        hint: "Choose a custom sound file for the ping (leave empty for default)",
+        hint: "Choose a custom sound file for the sound notification (leave empty for default)",
         scope: "client",
         config: true,
         type: String,
