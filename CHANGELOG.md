@@ -1,4 +1,15 @@
-# Versions changelog
+# Releases changelog
+
+## 1.3.0
+
+### New display option in settings
+
+- Added option to show only roll card and chatbox, hiding the dice tray
+
+### Bug fixes
+
+- Vertical size is now limited, a scrollbar will appear if needed
+- Default position of the chat moved a bit to the left to not cover the sidebar menu with tall roll cards
 
 ## 1.2.0
 

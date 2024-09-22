@@ -40,6 +40,30 @@ function getResultClass(result, ranges) {
     return '';
 }
 
+export function applySeeOnlyChat(seeOnlyChat) {
+    const diceRollSections = document.querySelectorAll('.dice-buttons, .custom-dice-controls, .roll-result'); 
+    const sleekChatContainer = document.querySelector('.sleek-chat-container');
+
+    diceRollSections.forEach(section => {
+        if (seeOnlyChat) {
+            section.style.display = 'none';  // Hide all dice-related sections
+        } else {
+            section.style.display = '';  // Show them again
+        }
+    });
+
+    if (sleekChatContainer) {
+        sleekChatContainer.classList.toggle('chat-only-mode', seeOnlyChat);
+    }
+}
+
+
+// Apply setting on load
+Hooks.once("ready", () => {
+    const seeOnlyChat = game.settings.get("sleek-chat", "seeOnlyChat");
+    applySeeOnlyChat(seeOnlyChat);
+});
+
 // Function to apply navigation button hiding based on settings
 export function applyNavButtonHiding() {
     const hideAll = game.settings.get("sleek-chat", "hideNavButtonsAll");
@@ -407,9 +431,7 @@ Hooks.on("renderChatLog", async (app, html, data) => {
             return 'critical';
         }
         return '';
-    }
-    
-    
+    }  
     
     function updateDiceCount(dice, count) {
         const countElement = $(`.dice-count[data-dice="${dice}"]`);
@@ -419,6 +441,9 @@ Hooks.on("renderChatLog", async (app, html, data) => {
             countElement.text("0").css('display', 'none');
         }
     }
+
+    const seeOnlyChat = game.settings.get("sleek-chat", "seeOnlyChat");
+    applySeeOnlyChat(seeOnlyChat);
 });
 
 // Hook to run when Foundry VTT is fully ready

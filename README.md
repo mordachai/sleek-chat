@@ -30,6 +30,7 @@ https://github.com/mordachai/sleek-chat/raw/main/module.json
 - **Hide Navigation Menus:** You can occult the selected navigation buttons in the sidebar to help lessen the cluttering, keeping only the ones your players need.
 - **Hide Always:** Keep the selected menus hidden even when the sidebar is expanded.
 - **Apply only to Players:** Hide navigation buttons only for non-GM users, while you keep seeing everything.
+- **Show only chat:** Hide dice roll controls, display only chatbox and the last rolled card.
 - **Dice Color:** Choose from various color options for the dice icons (white, red, green, cyan, blue, pink, yellow).
 - **dx Result Ranges:** Enter the fumble, normal, and critical ranges for the die roll on the chat. Example:
     - _**FitD systems:**_ set the D6s to "1-3; 4-5; 6" to represent the fail, partial success, and success results.

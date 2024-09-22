@@ -39,6 +39,18 @@ Hooks.once('init', function() {
         });
     });
 
+    game.settings.register("sleek-chat", "seeOnlyChat", {
+        name: "Show only chat",
+        hint: "Hides the dice roll section, displaying only the chatbox and messages",
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: false,
+        onChange: value => {
+            applySeeOnlyChat(value);
+        }
+    });
+ 
     game.settings.register("sleek-chat", "enablePingSound", {
         name: "Enable Sound Notification",
         hint: "Play a sound notification when a new message is displayed on chat",
