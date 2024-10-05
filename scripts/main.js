@@ -1,7 +1,8 @@
 import { debugLog } from './sleek-chat-debug.js';
 import './settings.js';
 import { RecentMessageDisplay } from './recent-message-display.js';
-import { updateDragAndDropState } from './drag-drop.js';
+import { updateDragAndDropState } from './drag-pos.js';
+import { getDragPosition, setDragPosition } from './drag-pos.js';
 
 function parseDiceRanges() {
     const ranges = {};
@@ -41,15 +42,12 @@ function getResultClass(result, ranges) {
 }
 
 export function applySeeOnlyChat(seeOnlyChat) {
-    const diceRollSections = document.querySelectorAll('.dice-buttons, .custom-dice-controls, .roll-result'); 
+    const diceRollSections = document.querySelectorAll('.dice-buttons, .custom-dice-controls'); 
     const sleekChatContainer = document.querySelector('.sleek-chat-container');
 
+    // Hide or show dice-related sections immediately based on the setting value
     diceRollSections.forEach(section => {
-        if (seeOnlyChat) {
-            section.style.display = 'none';  // Hide all dice-related sections
-        } else {
-            section.style.display = '';  // Show them again
-        }
+        section.style.display = seeOnlyChat ? 'none' : '';  // Hide or restore dice sections
     });
 
     if (sleekChatContainer) {
@@ -57,11 +55,21 @@ export function applySeeOnlyChat(seeOnlyChat) {
     }
 }
 
-
 // Apply setting on load
 Hooks.once("ready", () => {
     const seeOnlyChat = game.settings.get("sleek-chat", "seeOnlyChat");
     applySeeOnlyChat(seeOnlyChat);
+
+    // Set the initial position of the sleek chat container
+    const sleekChatContainer = document.querySelector('.sleek-chat-container');
+    if (sleekChatContainer) {
+        const savedPosition = getDragPosition('sleek-chat');
+        sleekChatContainer.style.left = savedPosition.left;
+        sleekChatContainer.style.top = savedPosition.top;
+    }
+
+    // Initialize drag and drop
+    updateDragAndDropState(game.settings.get("sleek-chat", "enableDragAndDrop"));
 });
 
 // Function to apply navigation button hiding based on settings
@@ -198,12 +206,33 @@ Hooks.on('createChatMessage', (message, options, userId) => {
 Hooks.on("renderChatLog", async (app, html, data) => {
     debugLog("renderChatLog: Starting to render Sleek Chat UI for all users.");
 
-    const templatePath = "modules/sleek-chat/templates/dice-toolbar.html";
-    const users = game.users.filter(user => user.active && user.id !== game.user.id);
-    const toolbarHTML = await renderTemplate(templatePath, { users });
+  const templatePath = "modules/sleek-chat/templates/dice-toolbar.hbs";
+  const users = game.users.filter(user => user.active && user.id !== game.user.id);
+  const showOnlyChat = game.settings.get("sleek-chat", "seeOnlyChat");
+  const toolbarHTML = await renderTemplate(templatePath, { users, showOnlyChat, dice: [
+    { type: 'd4', label: 'D4' },
+    { type: 'd6', label: 'D6' },
+    { type: 'd8', label: 'D8' },
+    { type: 'd10', label: 'D10' },
+    { type: 'd12', label: 'D12' },
+    { type: 'd20', label: 'D20' },
+    { type: 'd100', label: 'D100' },
+  ]});
 
-    debugLog("Toolbar HTML generated. Appending to body.");
-    $('body').append(toolbarHTML);
+  debugLog("Toolbar HTML generated. Appending to body.");
+  $('body').append(toolbarHTML);
+
+  // Apply settings changes immediately after rendering
+  Hooks.on('updateSetting', (setting) => {
+    if (setting.key.startsWith('sleek-chat.')) {
+      debugLog(`Setting ${setting.key} changed, applying updates.`);
+      if (setting.key === 'sleek-chat.seeOnlyChat') {
+        applySeeOnlyChat(game.settings.get('sleek-chat', 'seeOnlyChat'));
+      } else {
+        location.reload();
+      }
+    }
+  });
 
     // Add the event listener for Enter key press in the chat input
     const chatInput = document.getElementById('custom-chat-input');

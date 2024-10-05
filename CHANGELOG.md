@@ -1,5 +1,17 @@
 # Releases changelog
 
+## 1.3.1
+
+### Improvements
+
+- Better handling of chat drawing using handlebar files instead of html
+- Drag the chat around is more stable and register last position
+
+### Bug fixes
+
+- Issue with bottom sticking to canvas base
+- Issue with saving some settings like See only chat requiring page refresh to take effect
+
 ## 1.3.0
 
 ### New display option in settings

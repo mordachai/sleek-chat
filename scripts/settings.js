@@ -2,9 +2,111 @@ import { debugLog } from './sleek-chat-debug.js';
 import { applyNavButtonHiding } from './main.js';
 import { applyDiceColorFilter } from './main.js';
 import { applyMessageFadeOutSettings } from './recent-message-display.js';
-import { updateDragAndDropState } from './drag-drop.js';
+import { updateDragAndDropState } from './drag-pos.js';
+import { applySeeOnlyChat } from './main.js';
+
 
 Hooks.once('init', function() {
+    // General Settings
+    game.settings.register("sleek-chat", "enableDragAndDrop", {
+        name: "Enable Drag and Drop",
+        hint: "Allow the Sleek Chat interface to be dragged and positioned anywhere on the screen.",
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: false,
+        onChange: value => {
+            updateDragAndDropState(value);
+        }
+    });
+
+    // Chat Appearance Settings
+    game.settings.register("sleek-chat", "seeOnlyChat", {
+        name: "Show only chat",
+        hint: "Hides the dice roll section, displaying only the chatbox and messages",
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: false,
+        onChange: value => {
+            applySeeOnlyChat(value); // Ensure this runs immediately to apply the UI change.
+        }
+    });
+
+    game.settings.register("sleek-chat", "sleekChatOpacity", {
+        name: "Sleek Chat Opacity",
+        hint: "Set the opacity of the Sleek Chat interface.",
+        scope: "client",
+        config: true,
+        type: Number,
+        range: {
+            min: 0,
+            max: 1,
+            step: 0.1
+        },
+        default: 0.7,
+        onChange: value => {
+            debugLog(`Sleek Chat Opacity set to: ${value}`);
+        }
+    });
+
+    game.settings.register("sleek-chat", "messageFadeOutTime", {
+        name: "Message Fade Out Time (seconds)",
+        hint: "Set the time in seconds for messages to fade out.",
+        scope: "client",
+        config: true,
+        type: Number,
+        range: {
+            min: 1,
+            max: 20,
+            step: 0.5
+        },
+        default: 5,
+        onChange: value => {
+            // Placeholder for any immediate changes
+            debugLog(`Message Fade Out Time set to: ${value} seconds`);
+        }
+    });
+
+    game.settings.register("sleek-chat", "messageFadeOutOpacity", {
+        name: "Message Fade Out Opacity",
+        hint: "Set the final opacity level for messages when they fade out.",
+        scope: "client",
+        config: true,
+        type: Number,
+        range: {
+            min: 0,
+            max: 1,
+            step: 0.1
+        },
+        default: 0.5,
+        onChange: value => {
+            debugLog(`Message Fade Out Opacity set to: ${value}`);
+        }
+    });
+
+    game.settings.register("sleek-chat", "diceColorFilter", {
+        name: "Dice Color",
+        hint: "Select the color of the dice used in the Sleek Chat.",
+        scope: "client",
+        config: true,
+        type: String,
+        choices: {
+            "white": "White",
+            "red": "Red",
+            "green": "Green",
+            "cyan": "Cyan",
+            "blue": "Blue",
+            "pink": "Pink",
+            "yellow": "Yellow"
+        },
+        default: "white",
+        onChange: value => {
+            applyDiceColorFilter(value);
+        }
+    });
+
+    // Navigation Button Settings
     const reloadRequiredSettings = [
         "hideNavButtonsAll",
         "hideNavButtonsForPlayers",
@@ -39,38 +141,6 @@ Hooks.once('init', function() {
         });
     });
 
-    game.settings.register("sleek-chat", "seeOnlyChat", {
-        name: "Show only chat",
-        hint: "Hides the dice roll section, displaying only the chatbox and messages",
-        scope: "client",
-        config: true,
-        type: Boolean,
-        default: false,
-        onChange: value => {
-            applySeeOnlyChat(value);
-        }
-    });
- 
-    game.settings.register("sleek-chat", "enablePingSound", {
-        name: "Enable Sound Notification",
-        hint: "Play a sound notification when a new message is displayed on chat",
-        scope: "client",
-        config: true,
-        type: Boolean,
-        default: false
-    });
-
-    game.settings.register("sleek-chat", "pingSoundPath", {
-        name: "Ping Sound File",
-        hint: "Choose a custom sound file for the sound notification (leave empty for default)",
-        scope: "client",
-        config: true,
-        type: String,
-        default: "modules/sleek-chat/ui/chat-ping.ogg",
-        filePicker: "audio"
-    });
-
-    // Register other settings without forcing a reload
     game.settings.register("sleek-chat", "hideChat", {
         name: "Hide Chat Messages",
         scope: "world",
@@ -170,95 +240,7 @@ Hooks.once('init', function() {
         onChange: () => applyNavButtonHiding()
     });
 
-    game.settings.register("sleek-chat", "enableDragAndDrop", {
-        name: "Enable Drag and Drop",
-        hint: "Allow the Sleek Chat interface to be dragged and positioned anywhere on the screen.",
-        scope: "client",
-        config: true,
-        type: Boolean,
-        default: false,
-        onChange: value => {
-            updateDragAndDropState(value);
-        }
-    });
-
-    game.settings.register("sleek-chat", "messageFadeOutTime", {
-        name: "Message Fade Out Time (seconds)",
-        hint: "Set the time in seconds for messages to fade out.",
-        scope: "client",
-        config: true,
-        type: Number,
-        range: {
-            min: 1,
-            max: 20,
-            step: 0.5
-        },
-        default: 5,
-        onChange: value => {
-            // Placeholder for any immediate changes
-            debugLog(`Message Fade Out Time set to: ${value} seconds`);
-        }
-    });
-
-    // Register new setting for message fade-out opacity
-    game.settings.register("sleek-chat", "messageFadeOutOpacity", {
-        name: "Message Fade Out Opacity",
-        hint: "Set the final opacity level for messages when they fade out.",
-        scope: "client",
-        config: true,
-        type: Number,
-        range: {
-            min: 0,
-            max: 1,
-            step: 0.1
-        },
-        default: 0.5,
-        onChange: value => {
-            // Placeholder for any immediate changes
-            debugLog(`Message Fade Out Opacity set to: ${value}`);
-        }
-    });
-
-    // Register new setting for Sleek Chat opacity
-    game.settings.register("sleek-chat", "sleekChatOpacity", {
-        name: "Sleek Chat Opacity",
-        hint: "Set the opacity of the Sleek Chat interface.",
-        scope: "client",
-        config: true,
-        type: Number,
-        range: {
-            min: 0,
-            max: 1,
-            step: 0.1
-        },
-        default: 0.7,
-        onChange: value => {
-            // Placeholder for any immediate changes
-            debugLog(`Sleek Chat Opacity set to: ${value}`);
-        }
-    });
-
-    game.settings.register("sleek-chat", "diceColorFilter", {
-        name: "Dice Color",
-        hint: "Select the color of the dice used in the Sleek Chat.",
-        scope: "client",
-        config: true,
-        type: String, // The type is String because the setting value is a string representing the selected option.
-        choices: {
-            "white": "White",
-            "red": "Red",
-            "green": "Green",
-            "cyan": "Cyan",
-            "blue": "Blue",
-            "pink": "Pink",
-            "yellow": "Yellow"
-        },
-        default: "white",
-        onChange: value => {
-            applyDiceColorFilter(value);
-        }
-    });
-
+    // Dice Settings
     game.settings.register("sleek-chat", "d4ResultRanges", {
         name: "d4 Result Ranges",
         hint: "Enter the fumble, normal, and critical ranges for d4 (e.g., '1;2-3;4').",
@@ -343,7 +325,27 @@ Hooks.once('init', function() {
         }
     });
 
-    // Register the Debug Mode setting
+    // Sound Settings
+    game.settings.register("sleek-chat", "enablePingSound", {
+        name: "Enable Sound Notification",
+        hint: "Play a sound notification when a new message is displayed on chat",
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: false
+    });
+
+    game.settings.register("sleek-chat", "pingSoundPath", {
+        name: "Ping Sound File",
+        hint: "Choose a custom sound file for the sound notification (leave empty for default)",
+        scope: "client",
+        config: true,
+        type: String,
+        default: "modules/sleek-chat/ui/chat-ping.ogg",
+        filePicker: "audio"
+    });
+
+    // Debug Settings
     game.settings.register("sleek-chat", "debugMode", {
         name: "Enable Debug Mode",
         hint: "If enabled, debug messages will be printed to the console.",

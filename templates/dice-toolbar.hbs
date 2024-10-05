@@ -1,0 +1,47 @@
+<div class="sleek-chat-container {{#if showOnlyChat}}chat-only-mode{{/if}}">
+  <div class="recent-message-container">
+    <div class="message-display"></div>
+  </div>
+
+  <div class="nav-buttons-container">
+    <div>
+      <select id="whisper-recipient">
+        <option value="">Public</option>
+        {{#each users}}
+        <option value="{{this.id}}">{{this.name}}</option>
+        {{/each}}
+      </select>
+    </div>
+    <div style="display: flex;">
+      <button class="nav-button prev-button">&#9668;</button>
+      <button class="nav-button next-button">&#9658;</button>
+    </div>
+  </div>
+
+  <div class="sleek-chat">
+    <textarea id="custom-chat-input" rows="2" placeholder=""></textarea>
+
+    {{#unless showOnlyChat}}
+    <div class="dice-buttons">
+      {{#each dice}}
+      <button data-dice="{{this.type}}">
+        <img src="modules/sleek-chat/ui/{{this.type}}.svg" alt="{{this.label}}">
+        <span class="dice-count" data-dice="{{this.type}}">0</span>
+      </button>
+      {{/each}}
+    </div>
+
+    <div class="custom-dice-controls">
+      <button id="decrease-modifier">-</button>
+      <input type="number" id="modifier" value="0">
+      <button id="increase-modifier">+</button>
+
+      <button id="advantage-toggle" class="adv-toggle">Adv</button>
+      <button id="disadvantage-toggle" class="disadv-toggle">Disadv</button>
+
+      <button id="roll-dice">Roll!</button>
+    </div>
+    {{/unless}}
+  </div>
+  <div class="drag-handle" style="display: none;">☰</div>
+</div>

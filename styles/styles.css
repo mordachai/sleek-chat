@@ -9,8 +9,6 @@
     margin-bottom: 5px;
     width: 310px !important;
     position: absolute;
-    bottom: 20px !important;
-    right: 34px !important;  
     z-index: 100; 
     opacity: 1.0; 
     transition: none;
@@ -25,17 +23,15 @@
     opacity: 0.7;
 }
 
-/* When in chat-only mode, hide dice-related controls and results */
+/* When in chat-only mode, hide dice-related controls */
 .sleek-chat-container.chat-only-mode .dice-buttons,
-.sleek-chat-container.chat-only-mode .custom-dice-controls,
-.sleek-chat-container.chat-only-mode .roll-result {
+.sleek-chat-container.chat-only-mode .custom-dice-controls {
     display: none !important;
 }
 
-/* Adjust container height if dice controls are hidden */
-.sleek-chat-container.chat-only-mode {
-    height: auto;
-    width: auto;
+/* Ensure recent-message-container remains visible */
+.sleek-chat-container.chat-only-mode .recent-message-container {
+    display: block !important;
 }
 
 .sleek-chat-container .recent-message-container {
