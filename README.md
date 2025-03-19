@@ -25,7 +25,6 @@ https://github.com/mordachai/sleek-chat/raw/main/module.json
 
 ### The Sleek Chat will appear only when you collapse the Foundry sidebar.
 
-- **Enable Drag and Drop:** Allow the Sleek Chat interface to be repositioned on the screen.
 - **Sleek Chat Opacity:** Adjust the overall opacity of the Sleek Chat interface (0.1 to 1.0).
 - **Hide Navigation Menus:** You can occult the selected navigation buttons in the sidebar to help lessen the cluttering, keeping only the ones your players need.
 - **Hide Always:** Keep the selected menus hidden even when the sidebar is expanded.

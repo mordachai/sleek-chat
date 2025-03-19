@@ -1,26 +1,50 @@
 /* Sleek Chat Container */
 .sleek-chat-container {
+    position: fixed;
+    bottom: 10px; 
+    right: 38px;
     display: flex;
     flex-direction: column;
     align-items: stretch;
     padding: 2px;
-    background-color: rgba(90, 90, 90, 0.25);
+    /* background-color: rgba(90, 90, 90, 0.25); */
     border-radius: 5px;
     margin-bottom: 5px;
     width: 310px !important;
-    position: absolute;
     z-index: 100; 
-    opacity: 1.0; 
-    transition: none;
+    /* Opacity is controlled by JavaScript setting */
+    transition: opacity 0.3s ease;
     max-height: calc(100vh - 50px);
     overflow: hidden;
+}
+
+/* Hover effect to restore full opacity */
+.sleek-chat-container:hover {
+    opacity: 1.0 !important;
+}
+
+.chat-base-container{
+    background-color: #1919196f;
+    padding: 5px;
+    border-radius: 8px;
+}
+
+/* Navigation Buttons Container */
+.nav-buttons-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    height: 20px;
+    width: 100%;
 }
 
 /* Sleek Chat Area */
 .sleek-chat {
     display: flex;
     flex-direction: column;
-    opacity: 0.7;
+    background-color: rgba(90, 90, 90, 0.25);
 }
 
 /* When in chat-only mode, hide dice-related controls */
@@ -41,10 +65,11 @@
 
 /* Input Area Styling */
 #custom-chat-input {
-    width: 300px;
-    margin: auto;
+    width: 96%;
+    margin: 8px 0;
     padding: 5px;
     border-radius: 5px;
+    align-self: center;
     border: 1px solid #4b4e52;
     background-color: #1a1c1f;
     color: #fff;
@@ -215,15 +240,42 @@
     flex-grow: 1;
 }
 
-/* Navigation Buttons Container */
-.nav-buttons-container {
+/* Sleek Chat Message Components */
+.message-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 0px 5px;
-    padding: 0px;
-    height: 20px;
-}
+    flex-direction: column;
+    border-radius: 5px;
+    overflow: hidden;
+    transition: opacity 1s ease;
+  }
+  
+  .message-content-wrapper {
+    background-color: rgba(50, 50, 50, 0.7);
+    padding: 5px;
+    border-radius: 5px 5px 0 0;
+    transition: opacity 1s ease;
+  }
+  
+  .dice-result-wrapper {
+    background-color: rgba(30, 30, 30, 0.85);
+    padding: 5px;
+    border-radius: 0 0 5px 5px;
+    transition: opacity 1s ease;
+  }
+  
+  /* Add these to your existing CSS file */
+  .recent-message-container {
+    transition: none; /* Remove transition to avoid conflicts */
+  }
+  
+  /* Different fade levels for message components */
+  .faded .message-content-wrapper {
+    opacity: 0.6; /* Less faded for readability */
+  }
+  
+  .faded .dice-result-wrapper {
+    opacity: 0.4; /* More faded for visual distinction */
+  }
 
 #whisper-recipient {
     width: 120px;
@@ -281,16 +333,6 @@
 
 .animate-slide-in {
     animation: slide-in 0.5s ease-out forwards; /* Adjusted duration */
-}
-
-.drag-handle {
-    cursor: move;
-    padding: 5px;
-    text-align: center;
-    background-color: rgba(75, 78, 82, 0.1);
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    color: #d6d6d6c8;
 }
 
 

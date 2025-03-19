@@ -1,8 +1,6 @@
 import { debugLog } from './sleek-chat-debug.js';
 import './settings.js';
 import { RecentMessageDisplay } from './recent-message-display.js';
-import { updateDragAndDropState } from './drag-pos.js';
-import { getDragPosition, setDragPosition } from './drag-pos.js';
 
 function parseDiceRanges() {
     const ranges = {};
@@ -59,17 +57,6 @@ export function applySeeOnlyChat(seeOnlyChat) {
 Hooks.once("ready", () => {
     const seeOnlyChat = game.settings.get("sleek-chat", "seeOnlyChat");
     applySeeOnlyChat(seeOnlyChat);
-
-    // Set the initial position of the sleek chat container
-    const sleekChatContainer = document.querySelector('.sleek-chat-container');
-    if (sleekChatContainer) {
-        const savedPosition = getDragPosition('sleek-chat');
-        sleekChatContainer.style.left = savedPosition.left;
-        sleekChatContainer.style.top = savedPosition.top;
-    }
-
-    // Initialize drag and drop
-    updateDragAndDropState(game.settings.get("sleek-chat", "enableDragAndDrop"));
 });
 
 // Function to apply navigation button hiding based on settings
@@ -490,9 +477,6 @@ Hooks.on('ready', () => {
     // Apply the dice color filter on startup
     const diceColorFilter = game.settings.get("sleek-chat", "diceColorFilter");
     applyDiceColorFilter(diceColorFilter);
-
-    // Initialize drag and drop
-    updateDragAndDropState(game.settings.get("sleek-chat", "enableDragAndDrop"));
 
     const hideAdvDisadv = game.settings.get("sleek-chat", "hideAdvDisadv");
     if (hideAdvDisadv) {
