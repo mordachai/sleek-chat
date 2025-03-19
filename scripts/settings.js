@@ -3,6 +3,7 @@ import { applyNavButtonHiding } from './main.js';
 import { applyDiceColorFilter } from './main.js';
 import { applyMessageFadeOutSettings } from './recent-message-display.js';
 import { applySeeOnlyChat } from './main.js';
+import { applyChatBaseContainerOpacity } from './main.js';
 
 
 Hooks.once('init', function() {
@@ -21,7 +22,7 @@ Hooks.once('init', function() {
 
     game.settings.register("sleek-chat", "sleekChatOpacity", {
         name: "Sleek Chat Opacity",
-        hint: "Set the opacity of the Sleek Chat interface.",
+        hint: "Set the opacity of the Sleek Chat interface. This applies to both the toolbar and the chat container when not hovered.",
         scope: "client",
         config: true,
         type: Number,
@@ -33,6 +34,8 @@ Hooks.once('init', function() {
         default: 0.7,
         onChange: value => {
             debugLog(`Sleek Chat Opacity set to: ${value}`);
+            // Apply the new opacity value immediately
+            applyChatBaseContainerOpacity();
         }
     });
 

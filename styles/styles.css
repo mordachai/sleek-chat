@@ -27,6 +27,16 @@
     background-color: #1919196f;
     padding: 5px;
     border-radius: 8px;
+    transition: opacity 0.3s ease;
+}
+
+.sleek-chat-container:hover .chat-base-container {
+    opacity: 1.0 !important;
+}
+
+/* Ensure the hover effect works when directly hovering the chat base container */
+.chat-base-container:hover {
+    opacity: 1.0 !important;
 }
 
 /* Navigation Buttons Container */
@@ -274,7 +284,7 @@
   }
   
   .faded .sc-dice-result-wrapper {
-    opacity: 0.4; /* More faded for visual distinction */
+    opacity: 1; /* More faded for visual distinction */
   }
 
 #whisper-recipient {

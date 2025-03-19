@@ -167,19 +167,25 @@ export class RecentMessageDisplay {
     static startFadeOutTimer() {
         const fadeOutTime = game.settings.get("sleek-chat", "messageFadeOutTime") * 1000;
         const fadeOutOpacity = game.settings.get("sleek-chat", "messageFadeOutOpacity");
+        const sleekChatOpacity = game.settings.get("sleek-chat", "sleekChatOpacity");
         
         debugLog(`RecentMessageDisplay: Calculated fadeOutTime is ${fadeOutTime} milliseconds.`);
         
         const container = this.recentMessageContainer;
+        const chatBaseContainer = document.querySelector('.chat-base-container');
         
         // First, wait for the fadeOutTime delay
         setTimeout(() => {
             debugLog("RecentMessageDisplay: Starting fade out after specified delay.");
             
-            // Instead of changing opacity directly, add a class that controls component opacities
+            // Add the faded class to recent message container
             $(container).addClass('faded');
             
-            // No longer using fadeTo animation as we're controlling each component separately via CSS
+            // Apply opacity to chat base container
+            if (chatBaseContainer && !chatBaseContainer.matches(':hover')) {
+                chatBaseContainer.style.opacity = sleekChatOpacity;
+                debugLog(`Chat base container opacity set to ${sleekChatOpacity}`);
+            }
         }, fadeOutTime);
     }
     

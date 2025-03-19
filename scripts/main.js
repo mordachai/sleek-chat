@@ -28,6 +28,34 @@ function parseDiceRanges() {
     return ranges;
 }
 
+export function applyChatBaseContainerOpacity() {
+    const chatBaseContainer = document.querySelector('.chat-base-container');
+    const sleekChatOpacity = game.settings.get("sleek-chat", "sleekChatOpacity");
+    
+    if (chatBaseContainer) {
+        // Set initial opacity to the setting value
+        chatBaseContainer.style.opacity = sleekChatOpacity;
+        
+        // Add hover event listeners
+        chatBaseContainer.addEventListener('mouseenter', () => {
+            chatBaseContainer.style.opacity = '1.0';
+            debugLog("Chat base container opacity set to 1.0 on hover");
+        });
+        
+        chatBaseContainer.addEventListener('mouseleave', () => {
+            // Start fade out timer
+            setTimeout(() => {
+                chatBaseContainer.style.opacity = sleekChatOpacity;
+                debugLog(`Chat base container opacity reset to ${sleekChatOpacity} after mouse leave`);
+            }, game.settings.get("sleek-chat", "messageFadeOutTime") * 1000);
+        });
+        
+        debugLog("Chat base container opacity events set up");
+    } else {
+        debugLog("Chat base container not found");
+    }
+}
+
 function getResultClass(result, ranges) {
     if (result >= ranges[0].min && result <= ranges[0].max) {
         return 'fumble';
@@ -278,9 +306,10 @@ Hooks.on("renderChatLog", async (app, html, data) => {
         const recentMessageContainer = document.querySelector('.recent-message-container');
         const navButtonsContainer = document.querySelector('.nav-buttons-container');
         const sleekChatContainer = document.querySelector('.sleek-chat-container');
-
+        const chatBaseContainer = document.querySelector('.chat-base-container');
+        
         debugLog("Sidebar is collapsed:", isCollapsed);
-
+        
         if (toolbar) {
             toolbar.style.display = isCollapsed ? 'flex' : 'none';
             debugLog("Toolbar visibility set to:", isCollapsed ? 'flex' : 'none');
@@ -295,6 +324,9 @@ Hooks.on("renderChatLog", async (app, html, data) => {
         }
         if (sleekChatContainer) {
             sleekChatContainer.style.display = isCollapsed ? 'block' : 'none';
+        }
+        if (chatBaseContainer && isCollapsed) {
+            applyChatBaseContainerOpacity();
         }
     };
 
@@ -473,6 +505,8 @@ Hooks.on('ready', () => {
     const sleekChatOpacity = game.settings.get("sleek-chat", "sleekChatOpacity");
     $('.sleek-chat').css('opacity', sleekChatOpacity);
     debugLog("Sleek Chat Opacity set to:", sleekChatOpacity);
+
+    applyChatBaseContainerOpacity();
 
     // Apply the dice color filter on startup
     const diceColorFilter = game.settings.get("sleek-chat", "diceColorFilter");
