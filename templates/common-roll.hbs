@@ -11,13 +11,13 @@
   {{/if}}
   
   {{#if roll}}
-  <div class="dice-result-wrapper">
+  <div class="sc-dice-result-wrapper">
     <p class="roll-formula">{{roll.formula}}</p>
 
-    <div class="dice-results">
+    <div class="sc-dice-results">
       {{#each roll.terms as |term|}}
         {{#each term.results as |result|}}
-          <div class="dice-result dice-{{term.faces}}">
+          <div class="sc-dice-result dice-{{term.faces}}">
             <span class="dice-number {{result.class}}">{{result.value}}</span>
           </div>
         {{/each}}
@@ -25,7 +25,7 @@
     </div>
 
     {{#if roll.total}}
-      <p class="roll-total">{{roll.total}}</p>
+      <p class="sc-roll-total">{{roll.total}}</p>
     {{/if}}
   </div>
   {{/if}}
