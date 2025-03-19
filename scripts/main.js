@@ -126,6 +126,7 @@ export function applyNavButtonHiding() {
     // Observe changes in the sidebar state
     const observer = new MutationObserver(() => {
         updateButtonVisibility();
+        cleanupSleekChat();
     });
 
     observer.observe(document.getElementById('sidebar'), { attributes: true, attributeFilter: ['class'] });
@@ -517,6 +518,16 @@ Hooks.on('ready', () => {
     }
     
 });
+
+function cleanupSleekChat() {
+    const existingContainers = document.querySelectorAll('.sleek-chat-container');
+    if (existingContainers.length > 1) {
+      // Remove all but the most recently created container
+      for (let i = 0; i < existingContainers.length - 1; i++) {
+        existingContainers[i].remove();
+      }
+    }
+  }
 
 // Function to apply dice color filter based on settings
 export function applyDiceColorFilter(color) {
