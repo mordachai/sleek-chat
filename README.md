@@ -6,8 +6,6 @@
 
 ![image](https://github.com/user-attachments/assets/c39f24ce-467d-4593-bcde-156685089401)
 
-Check the video on YouTube: https://www.youtube.com/watch?v=c95AF7TEV7E
-
 ## Installation
 
 In Foundry VTT, go to the Add-on Modules tab and click Install Module. Then:
