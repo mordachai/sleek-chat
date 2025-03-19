@@ -1,8 +1,6 @@
 import { debugLog } from './sleek-chat-debug.js';
 import './settings.js';
 import { RecentMessageDisplay } from './recent-message-display.js';
-import { updateDragAndDropState } from './drag-pos.js';
-import { getDragPosition, setDragPosition } from './drag-pos.js';
 
 function parseDiceRanges() {
     const ranges = {};
@@ -28,6 +26,34 @@ function parseDiceRanges() {
     // Add similar entries for other dice types (d10, d12, d20, etc.)
 
     return ranges;
+}
+
+export function applyChatBaseContainerOpacity() {
+    const chatBaseContainer = document.querySelector('.chat-base-container');
+    const sleekChatOpacity = game.settings.get("sleek-chat", "sleekChatOpacity");
+    
+    if (chatBaseContainer) {
+        // Set initial opacity to the setting value
+        chatBaseContainer.style.opacity = sleekChatOpacity;
+        
+        // Add hover event listeners
+        chatBaseContainer.addEventListener('mouseenter', () => {
+            chatBaseContainer.style.opacity = '1.0';
+            debugLog("Chat base container opacity set to 1.0 on hover");
+        });
+        
+        chatBaseContainer.addEventListener('mouseleave', () => {
+            // Start fade out timer
+            setTimeout(() => {
+                chatBaseContainer.style.opacity = sleekChatOpacity;
+                debugLog(`Chat base container opacity reset to ${sleekChatOpacity} after mouse leave`);
+            }, game.settings.get("sleek-chat", "messageFadeOutTime") * 1000);
+        });
+        
+        debugLog("Chat base container opacity events set up");
+    } else {
+        debugLog("Chat base container not found");
+    }
 }
 
 function getResultClass(result, ranges) {
@@ -59,17 +85,6 @@ export function applySeeOnlyChat(seeOnlyChat) {
 Hooks.once("ready", () => {
     const seeOnlyChat = game.settings.get("sleek-chat", "seeOnlyChat");
     applySeeOnlyChat(seeOnlyChat);
-
-    // Set the initial position of the sleek chat container
-    const sleekChatContainer = document.querySelector('.sleek-chat-container');
-    if (sleekChatContainer) {
-        const savedPosition = getDragPosition('sleek-chat');
-        sleekChatContainer.style.left = savedPosition.left;
-        sleekChatContainer.style.top = savedPosition.top;
-    }
-
-    // Initialize drag and drop
-    updateDragAndDropState(game.settings.get("sleek-chat", "enableDragAndDrop"));
 });
 
 // Function to apply navigation button hiding based on settings
@@ -126,6 +141,7 @@ export function applyNavButtonHiding() {
     // Observe changes in the sidebar state
     const observer = new MutationObserver(() => {
         updateButtonVisibility();
+        cleanupSleekChat();
     });
 
     observer.observe(document.getElementById('sidebar'), { attributes: true, attributeFilter: ['class'] });
@@ -290,9 +306,10 @@ Hooks.on("renderChatLog", async (app, html, data) => {
         const recentMessageContainer = document.querySelector('.recent-message-container');
         const navButtonsContainer = document.querySelector('.nav-buttons-container');
         const sleekChatContainer = document.querySelector('.sleek-chat-container');
-
+        const chatBaseContainer = document.querySelector('.chat-base-container');
+        
         debugLog("Sidebar is collapsed:", isCollapsed);
-
+        
         if (toolbar) {
             toolbar.style.display = isCollapsed ? 'flex' : 'none';
             debugLog("Toolbar visibility set to:", isCollapsed ? 'flex' : 'none');
@@ -307,6 +324,9 @@ Hooks.on("renderChatLog", async (app, html, data) => {
         }
         if (sleekChatContainer) {
             sleekChatContainer.style.display = isCollapsed ? 'block' : 'none';
+        }
+        if (chatBaseContainer && isCollapsed) {
+            applyChatBaseContainerOpacity();
         }
     };
 
@@ -486,12 +506,11 @@ Hooks.on('ready', () => {
     $('.sleek-chat').css('opacity', sleekChatOpacity);
     debugLog("Sleek Chat Opacity set to:", sleekChatOpacity);
 
+    applyChatBaseContainerOpacity();
+
     // Apply the dice color filter on startup
     const diceColorFilter = game.settings.get("sleek-chat", "diceColorFilter");
     applyDiceColorFilter(diceColorFilter);
-
-    // Initialize drag and drop
-    updateDragAndDropState(game.settings.get("sleek-chat", "enableDragAndDrop"));
 
     const hideAdvDisadv = game.settings.get("sleek-chat", "hideAdvDisadv");
     if (hideAdvDisadv) {
@@ -517,6 +536,16 @@ Hooks.on('ready', () => {
     }
     
 });
+
+function cleanupSleekChat() {
+    const existingContainers = document.querySelectorAll('.sleek-chat-container');
+    if (existingContainers.length > 1) {
+      // Remove all but the most recently created container
+      for (let i = 0; i < existingContainers.length - 1; i++) {
+        existingContainers[i].remove();
+      }
+    }
+  }
 
 // Function to apply dice color filter based on settings
 export function applyDiceColorFilter(color) {

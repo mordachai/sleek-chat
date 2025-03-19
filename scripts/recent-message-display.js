@@ -113,10 +113,9 @@ export class RecentMessageDisplay {
     
             this.updateButtonStates();
         }, 5); // 5ms delay to ensure the DOM is updated
-    }
+    }    
     
-    
-       static navigateMessages(direction) {
+    static navigateMessages(direction) {
         debugLog("RecentMessageDisplay: Navigating messages with direction:", direction);
         this.currentMessageIndex += direction;
         if (this.currentMessageIndex < 0) {
@@ -166,20 +165,58 @@ export class RecentMessageDisplay {
     }
 
     static startFadeOutTimer() {
-        const fadeOutTime = game.settings.get("sleek-chat", "messageFadeOutTime") * 1000; // Convert seconds to milliseconds
+        const fadeOutTime = game.settings.get("sleek-chat", "messageFadeOutTime") * 1000;
         const fadeOutOpacity = game.settings.get("sleek-chat", "messageFadeOutOpacity");
-    
-        // Log the value of fadeOutTime to the console
+        const sleekChatOpacity = game.settings.get("sleek-chat", "sleekChatOpacity");
+        
         debugLog(`RecentMessageDisplay: Calculated fadeOutTime is ${fadeOutTime} milliseconds.`);
-    
-        const container = this.recentMessageContainer; // Target the container instead of message-display
-    
+        
+        const container = this.recentMessageContainer;
+        const chatBaseContainer = document.querySelector('.chat-base-container');
+        
         // First, wait for the fadeOutTime delay
         setTimeout(() => {
             debugLog("RecentMessageDisplay: Starting fade out after specified delay.");
-            $(container).fadeTo(1000, fadeOutOpacity); // 1 second fade-out
+            
+            // Add the faded class to recent message container
+            $(container).addClass('faded');
+            
+            // Apply opacity to chat base container
+            if (chatBaseContainer && !chatBaseContainer.matches(':hover')) {
+                chatBaseContainer.style.opacity = sleekChatOpacity;
+                debugLog(`Chat base container opacity set to ${sleekChatOpacity}`);
+            }
         }, fadeOutTime);
-    } 
+    }
+    
+    static setupHoverEffect() {
+        const fadeOutTime = game.settings.get("sleek-chat", "messageFadeOutTime") * 1000;
+        const container = this.recentMessageContainer;
+    
+        // Mouse enter: instantly restore full opacity by removing the faded class
+        container.addEventListener('mouseover', () => {
+            $(container).removeClass('faded');
+            debugLog("RecentMessageDisplay: Mouse over - container opacity restored.");
+        });
+    
+        // Mouse leave: start the fade-out after the specified delay
+        container.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+                $(container).addClass('faded');
+                debugLog("RecentMessageDisplay: Mouse leave - reapplied fade effect to container.");
+            }, fadeOutTime);
+        });
+    }
+    
+    static applyFadeOutEffect(element) {
+        const fadeOutTime = game.settings.get("sleek-chat", "messageFadeOutTime") * 1000;
+    
+        // Start the fade-out effect after the specified delay
+        setTimeout(() => {
+            debugLog("RecentMessageDisplay: Starting fade out after specified delay.");
+            $(element).addClass('faded');
+        }, fadeOutTime);
+    }
 
     static setupHoverEffect() {
         const fadeOutTime = game.settings.get("sleek-chat", "messageFadeOutTime") * 1000;
@@ -290,26 +327,6 @@ export class RecentMessageDisplay {
 
         // Update the state of navigation buttons
         this.updateButtonStates();
-    }
-
-    static applyFadeOutEffect(element) {
-        const fadeOutTime = game.settings.get("sleek-chat", "messageFadeOutTime") * 1000; // Convert to milliseconds
-        const fadeOutOpacity = game.settings.get("sleek-chat", "messageFadeOutOpacity");
-
-        // Start the fade-out effect after the specified delay
-        setTimeout(() => {
-            debugLog("RecentMessageDisplay: Starting fade out after specified delay.");
-            $(element).fadeTo(1000, fadeOutOpacity); // 1 second fade-out
-        }, fadeOutTime);
-    }
-
-    static applyMessageFadeOutSettings() {
-        debugLog("RecentMessageDisplay: Applying message fade out settings.");
-        const messageElements = document.querySelectorAll('.recent-message');
-        messageElements.forEach(element => {
-            // Reapply the fade-out effect with updated settings
-            RecentMessageDisplay.applyFadeOutEffect(element);
-        });
     }
 }
 

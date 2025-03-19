@@ -2,24 +2,11 @@ import { debugLog } from './sleek-chat-debug.js';
 import { applyNavButtonHiding } from './main.js';
 import { applyDiceColorFilter } from './main.js';
 import { applyMessageFadeOutSettings } from './recent-message-display.js';
-import { updateDragAndDropState } from './drag-pos.js';
 import { applySeeOnlyChat } from './main.js';
+import { applyChatBaseContainerOpacity } from './main.js';
 
 
 Hooks.once('init', function() {
-    // General Settings
-    game.settings.register("sleek-chat", "enableDragAndDrop", {
-        name: "Enable Drag and Drop",
-        hint: "Allow the Sleek Chat interface to be dragged and positioned anywhere on the screen.",
-        scope: "client",
-        config: true,
-        type: Boolean,
-        default: false,
-        onChange: value => {
-            updateDragAndDropState(value);
-        }
-    });
-
     // Chat Appearance Settings
     game.settings.register("sleek-chat", "seeOnlyChat", {
         name: "Show only chat",
@@ -35,18 +22,20 @@ Hooks.once('init', function() {
 
     game.settings.register("sleek-chat", "sleekChatOpacity", {
         name: "Sleek Chat Opacity",
-        hint: "Set the opacity of the Sleek Chat interface.",
+        hint: "Set the opacity of the Sleek Chat interface. This applies to both the toolbar and the chat container when not hovered.",
         scope: "client",
         config: true,
         type: Number,
         range: {
-            min: 0,
+            min: 0.2,
             max: 1,
             step: 0.1
         },
         default: 0.7,
         onChange: value => {
             debugLog(`Sleek Chat Opacity set to: ${value}`);
+            // Apply the new opacity value immediately
+            applyChatBaseContainerOpacity();
         }
     });
 
@@ -57,11 +46,11 @@ Hooks.once('init', function() {
         config: true,
         type: Number,
         range: {
-            min: 1,
-            max: 20,
+            min: 5,
+            max: 30,
             step: 0.5
         },
-        default: 5,
+        default: 7,
         onChange: value => {
             // Placeholder for any immediate changes
             debugLog(`Message Fade Out Time set to: ${value} seconds`);
@@ -79,7 +68,7 @@ Hooks.once('init', function() {
             max: 1,
             step: 0.1
         },
-        default: 0.5,
+        default: 0.7,
         onChange: value => {
             debugLog(`Message Fade Out Opacity set to: ${value}`);
         }
