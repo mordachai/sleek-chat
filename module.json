@@ -2,7 +2,7 @@
   "id": "sleek-chat",
   "title": "Sleek Chat",
   "description": "A minimalist dice rolling toolbar that integrates seamlessly with the Foundry VTT chat, focusing on a clean and uncluttered interface.",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "compatibility": {
     "minimum": "12",
     "verified": "12"
