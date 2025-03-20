@@ -1,5 +1,30 @@
 import { debugLog } from './sleek-chat-debug.js';
 export class RecentMessageDisplay {
+    
+    
+    static validateMessageIds() {
+        // Filter out any message IDs that no longer exist in the game.messages collection
+        this.messageIds = this.messageIds.filter(id => game.messages.has(id));
+        
+        // If we filtered out messages, adjust the current index to be valid
+        if (this.currentMessageIndex >= this.messageIds.length) {
+            this.currentMessageIndex = this.messageIds.length - 1;
+        }
+        
+        // Update button states based on new array
+        this.updateButtonStates();
+        
+        // If we have a valid message, display it
+        if (this.messageIds.length > 0 && this.currentMessageIndex >= 0) {
+            this.updateRecentMessage(this.messageIds[this.currentMessageIndex]);
+        } else if (this.messageDisplay) {
+            // Clear the display if no valid messages remain
+            this.messageDisplay.innerHTML = '';
+            debugLog("RecentMessageDisplay: No valid messages to display after validation.");
+        }
+    }
+    
+    // Add this to the init method, after populating messageIds
     static init() {
         debugLog("RecentMessageDisplay: Initializing...");
         
@@ -8,22 +33,26 @@ export class RecentMessageDisplay {
         this.messageDisplay = this.recentMessageContainer.querySelector('.message-display');
         this.prevButton = document.querySelector('.nav-buttons-container .prev-button');
         this.nextButton = document.querySelector('.nav-buttons-container .next-button');
-
+    
         this.messageIds = [];
         this.currentMessageIndex = -1;
-
+    
         this.populateMessageIds(); // Fill the message IDs
+        
+        // Add this line to validate messages on initialization
+        this.validateMessageIds();
+        
         this.setupNavigationButtons();
-        this.setupDeleteFunctionality(); // Initialize delete functionality
-
+        this.setupDeleteFunctionality();
+    
         // Display the last message at startup
         if (this.messageIds.length > 0) {
             debugLog("RecentMessageDisplay: Displaying the last message on initialization.");
             this.updateRecentMessage(this.messageIds[this.currentMessageIndex]);
         }
-
+    
         this.hookChatLog();
-        RecentMessageDisplay.applyFadeOutEffect(this.recentMessageContainer); // Apply the fade-out effect at startup
+        RecentMessageDisplay.applyFadeOutEffect(this.recentMessageContainer);
     }
 
     static populateMessageIds() {
@@ -117,6 +146,16 @@ export class RecentMessageDisplay {
     
     static navigateMessages(direction) {
         debugLog("RecentMessageDisplay: Navigating messages with direction:", direction);
+        
+        // Validate message IDs before navigation
+        this.validateMessageIds();
+        
+        // If no valid messages, don't try to navigate
+        if (this.messageIds.length === 0) {
+            debugLog("RecentMessageDisplay: No valid messages to navigate.");
+            return;
+        }
+        
         this.currentMessageIndex += direction;
         if (this.currentMessageIndex < 0) {
             this.currentMessageIndex = 0;
