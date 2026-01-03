@@ -1,5 +1,29 @@
 # Releases changelog
 
+## 2.0.0
+
+### Major Refactoring
+
+- Complete rewrite focusing on chat popout enhancements
+- Removed dice rolling toolbar functionality (simplified module scope)
+- Added single message view with navigation controls (Previous/Next buttons)
+- Improved opacity controls with real-time slider adjustment
+- Enhanced popout window management with cleaner UI
+
+### Breaking Changes
+
+- Dice rolling features removed - module now focuses exclusively on chat popout improvements
+- All dice-related settings removed
+- Templates and UI assets for dice removed
+
+### Improvements
+
+- Streamlined codebase with modular architecture (PopoutChatManager, PopoutMessageManager, PopoutOpacityManager)
+- Better message history management (maintains last 50 messages)
+- Automatic message validation and cleanup
+- Cleaner popout interface with hidden header
+- More intuitive navigation through chat history
+
 ## 1.3.1
 
 ### Improvements

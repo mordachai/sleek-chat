@@ -2,6 +2,7 @@ import { debugLog } from './sleek-chat-debug.js';
 // Note: settings.js is loaded first in module.json, no need to import it here
 import { PopoutChatManager } from './popout-chat.js';
 import { PopoutMessageManager } from './popout-message-manager.js';
+import { PopoutOpacityManager } from './popout-opacity.js';
 
 // Hook to render the custom Sleek Chat UI on Chat Log render
 Hooks.on("renderChatLog", async (app, html, data) => {
@@ -29,6 +30,7 @@ Hooks.on('createChatMessage', (message, options, userId) => {
     // Handle popout if active
     if (PopoutChatManager.isActive()) {
         PopoutMessageManager.handleNewMessage(message.id);
+        PopoutOpacityManager.handleNewMessage();
     }
 });
 

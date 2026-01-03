@@ -1,10 +1,10 @@
 import { debugLog } from './sleek-chat-debug.js';
 
 Hooks.once('init', function() {
-    // Popout Chat Opacity Settings
-    game.settings.register("sleek-chat", "popoutChatOpacity", {
-        name: "Popout Chat Opacity",
-        hint: "Set opacity for the entire chat popout window",
+    // Faded Opacity Setting
+    game.settings.register("sleek-chat", "fadedOpacity", {
+        name: "Faded Opacity",
+        hint: "Opacity level when the chat is faded (inactive)",
         scope: "client",
         config: true,
         type: Number,
@@ -13,7 +13,22 @@ Hooks.once('init', function() {
             max: 1.0,
             step: 0.1
         },
-        default: 1.0
+        default: 0.5
+    });
+
+    // Fade Out Time Setting
+    game.settings.register("sleek-chat", "fadeOutTime", {
+        name: "Fade Out Time",
+        hint: "Time in milliseconds before chat fades to the faded opacity level",
+        scope: "client",
+        config: true,
+        type: Number,
+        range: {
+            min: 0,
+            max: 10000,
+            step: 100
+        },
+        default: 2000
     });
 
     // Debug Mode

@@ -57,25 +57,11 @@ export class PopoutChatManager {
     static injectControls() {
         console.log("PopoutChatManager: Injecting controls");
 
-        const chatOpacity = game.settings.get('sleek-chat', 'popoutChatOpacity');
-
         const controlsHtml = `
             <div class="sleek-popout-controls">
                 <div class="navigation-buttons">
                     <button class="sleek-nav-prev" title="Previous Message">◀ Prev</button>
                     <button class="sleek-nav-next" title="Next Message">Next ▶</button>
-                </div>
-                <div class="sleek-opacity-controls">
-                    <label>
-                        Opacity:
-                        <input type="range"
-                               id="sleek-chat-opacity"
-                               min="0.2"
-                               max="1.0"
-                               step="0.1"
-                               value="${chatOpacity}" />
-                        <span class="opacity-value">${Math.round(chatOpacity * 100)}%</span>
-                    </label>
                 </div>
             </div>
         `;
@@ -85,11 +71,6 @@ export class PopoutChatManager {
         if (chatForm.length > 0) {
             chatForm.after(controlsHtml);
             console.log("PopoutChatManager: Controls injected at bottom");
-
-            // Update opacity value display when slider changes
-            this.popoutHtml.find('#sleek-chat-opacity').on('input', (e) => {
-                $(e.target).siblings('.opacity-value').text(`${Math.round(e.target.value * 100)}%`);
-            });
         } else {
             console.log("PopoutChatManager: Warning - .chat-form not found, controls not injected");
         }
