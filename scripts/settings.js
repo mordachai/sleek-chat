@@ -31,6 +31,14 @@ Hooks.once('init', function() {
         default: 2000
     });
 
+    // Popout Position (hidden setting for saving window position)
+    game.settings.register("sleek-chat", "popoutPosition", {
+        scope: "client",
+        config: false,
+        type: Object,
+        default: null
+    });
+
     // Debug Mode
     game.settings.register("sleek-chat", "debugMode", {
         name: "Enable Debug Mode",

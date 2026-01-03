@@ -6,6 +6,7 @@ export class PopoutChatManager {
     static popoutApp = null;
     static popoutHtml = null;
     static isPopoutActive = false;
+    static initialPositionSet = false;
 
     static initialize(app, html, data) {
         console.log("PopoutChatManager: Starting initialization");
@@ -34,10 +35,75 @@ export class PopoutChatManager {
             console.log("PopoutChatManager: Step 5 - setup cleanup");
             this.setupCleanup();
 
+            console.log("PopoutChatManager: Step 6 - adjust initial position");
+            this.adjustInitialPosition();
+
             console.log("PopoutChatManager: Initialization complete!");
         } catch (error) {
             console.error("PopoutChatManager: ERROR during initialization", error);
         }
+    }
+
+    static adjustInitialPosition() {
+        // Check if we have a saved position
+        const savedPosition = game.settings.get('sleek-chat', 'popoutPosition');
+
+        if (savedPosition && savedPosition.top && savedPosition.left) {
+            // Restore saved position
+            this.popoutHtml.css({
+                'top': `${savedPosition.top}px`,
+                'left': `${savedPosition.left}px`
+            });
+            console.log(`PopoutChatManager: Restored saved position - top: ${savedPosition.top}px, left: ${savedPosition.left}px`);
+            this.ensureOnScreen();
+            this.initialPositionSet = true;
+            this.setupPositionSaving();
+            return;
+        }
+
+        // Wait for DOM to settle, then center vertically
+        requestAnimationFrame(() => {
+            const popoutHeight = this.popoutHtml.outerHeight();
+            const viewportHeight = window.innerHeight;
+            const centeredTop = Math.max(20, (viewportHeight - popoutHeight) / 2);
+
+            this.popoutHtml.css('top', `${centeredTop}px`);
+            console.log(`PopoutChatManager: Centered position - height: ${popoutHeight}px, viewport: ${viewportHeight}px, top: ${centeredTop}px`);
+            this.ensureOnScreen();
+            this.initialPositionSet = true;
+            this.setupPositionSaving();
+        });
+    }
+
+    static ensureOnScreen() {
+        requestAnimationFrame(() => {
+            const popoutWidth = this.popoutHtml.outerWidth();
+            const popoutHeight = this.popoutHtml.outerHeight();
+            let top = parseInt(this.popoutHtml.css('top')) || 0;
+            let left = parseInt(this.popoutHtml.css('left')) || 0;
+
+            // Clamp to viewport bounds
+            const maxTop = window.innerHeight - popoutHeight - 20;
+            const maxLeft = window.innerWidth - popoutWidth - 20;
+
+            top = Math.max(20, Math.min(top, maxTop));
+            left = Math.max(20, Math.min(left, maxLeft));
+
+            this.popoutHtml.css({ 'top': `${top}px`, 'left': `${left}px` });
+            debugLog(`PopoutChatManager: Ensured on screen - top: ${top}px, left: ${left}px`);
+        });
+    }
+
+    static setupPositionSaving() {
+        // Save position when window is dragged
+        this.popoutHtml.on('dragstop.sleekPosition', () => {
+            const position = {
+                top: parseInt(this.popoutHtml.css('top')) || 0,
+                left: parseInt(this.popoutHtml.css('left')) || 0
+            };
+            game.settings.set('sleek-chat', 'popoutPosition', position);
+            debugLog(`PopoutChatManager: Saved position - top: ${position.top}px, left: ${position.left}px`);
+        });
     }
 
     static hideHeader() {
@@ -56,6 +122,12 @@ export class PopoutChatManager {
 
     static injectControls() {
         console.log("PopoutChatManager: Injecting controls");
+
+        // Check if controls already exist
+        if (this.popoutHtml.find('.sleek-popout-controls').length > 0) {
+            console.log("PopoutChatManager: Controls already exist, skipping injection");
+            return;
+        }
 
         const controlsHtml = `
             <div class="sleek-popout-controls">
@@ -100,6 +172,11 @@ export class PopoutChatManager {
     static cleanup() {
         debugLog("PopoutChatManager: Cleaning up");
 
+        // Remove position saving listener
+        if (this.popoutHtml) {
+            this.popoutHtml.off('.sleekPosition');
+        }
+
         // Cleanup sub-managers
         PopoutOpacityManager.cleanup();
         PopoutMessageManager.cleanup();
@@ -108,6 +185,7 @@ export class PopoutChatManager {
         this.popoutApp = null;
         this.popoutHtml = null;
         this.isPopoutActive = false;
+        this.initialPositionSet = false;
 
         debugLog("PopoutChatManager: Cleanup complete");
     }

@@ -1,4 +1,5 @@
 import { debugLog } from './sleek-chat-debug.js';
+import { PopoutChatManager } from './popout-chat.js';
 
 export class PopoutMessageManager {
     static messageIds = [];
@@ -34,6 +35,10 @@ export class PopoutMessageManager {
     static showMessage(index) {
         debugLog(`PopoutMessageManager: Showing message at index ${index}`);
 
+        // Get popout container and current height before change
+        const popoutContainer = this.popoutHtml.closest('#chat-popout');
+        const oldHeight = popoutContainer.outerHeight();
+
         // Add mode class and hide all messages
         this.popoutHtml.find('.chat-log').addClass('sleek-chat-popout-mode');
         this.popoutHtml.find('.chat-log li.chat-message').removeClass('sleek-visible');
@@ -45,6 +50,30 @@ export class PopoutMessageManager {
         if (messageElement.length > 0) {
             messageElement.addClass('sleek-visible');
             debugLog(`PopoutMessageManager: Showing message ${messageId}`);
+
+            // Anchor from bottom: adjust top position to compensate for height change
+            // Only do this after initial position has been set
+            if (PopoutChatManager.initialPositionSet) {
+                requestAnimationFrame(() => {
+                    const newHeight = popoutContainer.outerHeight();
+                    const heightDiff = newHeight - oldHeight;
+
+                    if (heightDiff !== 0) {
+                        const currentTop = parseInt(popoutContainer.css('top')) || 0;
+                        const newTop = currentTop - heightDiff;
+                        popoutContainer.css('top', `${newTop}px`);
+
+                        // Save the adjusted position
+                        const position = {
+                            top: newTop,
+                            left: parseInt(popoutContainer.css('left')) || 0
+                        };
+                        game.settings.set('sleek-chat', 'popoutPosition', position);
+
+                        debugLog(`PopoutMessageManager: Adjusted top by ${-heightDiff}px (height changed by ${heightDiff}px)`);
+                    }
+                });
+            }
         } else {
             debugLog(`PopoutMessageManager: Warning - Message ${messageId} not found in DOM`);
         }
