@@ -1,11 +1,11 @@
 {
   "id": "sleek-chat",
   "title": "Sleek Chat",
-  "description": "A minimalist dice rolling toolbar that integrates seamlessly with the Foundry VTT chat, focusing on a clean and uncluttered interface.",
-  "version": "1.4.1",
+  "description": "Minimalist chat popout enhancements for Foundry VTT v13+. Shows only the current message with navigation controls and customizable opacity.",
+  "version": "2.0.0",
   "compatibility": {
     "minimum": "12",
-    "verified": "12"
+    "verified": "13"
   },
   "authors": [
     {
@@ -19,8 +19,10 @@
   "esmodules": [
     "scripts/settings.js",
     "scripts/sleek-chat-debug.js",
-    "scripts/main.js",
-    "scripts/recent-message-display.js"
+    "scripts/popout-opacity.js",
+    "scripts/popout-message-manager.js",
+    "scripts/popout-chat.js",
+    "scripts/main.js"
   ],
   "url": "https://github.com/mordachai/sleek-chat",
   "manifest": "https://github.com/mordachai/sleek-chat/raw/main/module.json",
