@@ -4,7 +4,7 @@
 
 **Sleek Chat** is a minimalist chat popout enhancement for Foundry VTT v13+ that lets you focus on one message at a time. Perfect for keeping your screen clean while still staying connected to the conversation.
 
-![Sleek Chat Preview](https://github.com/user-attachments/assets/aca66ed6-3a44-431d-98a6-509d2404fdcc)
+<img width="1914" height="1004" alt="image" src="https://github.com/user-attachments/assets/9a271ad5-d67d-4d86-83bc-291e5ba7c59c" />
 
 ## Installation
 
