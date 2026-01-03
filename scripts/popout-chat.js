@@ -45,65 +45,130 @@ export class PopoutChatManager {
     }
 
     static adjustInitialPosition() {
-        // Check if we have a saved position
-        const savedPosition = game.settings.get('sleek-chat', 'popoutPosition');
-
-        if (savedPosition && savedPosition.top && savedPosition.left) {
-            // Restore saved position
-            this.popoutHtml.css({
-                'top': `${savedPosition.top}px`,
-                'left': `${savedPosition.left}px`
-            });
-            console.log(`PopoutChatManager: Restored saved position - top: ${savedPosition.top}px, left: ${savedPosition.left}px`);
-            this.ensureOnScreen();
-            this.initialPositionSet = true;
-            this.setupPositionSaving();
-            return;
-        }
-
-        // Wait for DOM to settle, then center vertically
+        // Wait for DOM to settle before setting position
         requestAnimationFrame(() => {
-            const popoutHeight = this.popoutHtml.outerHeight();
-            const viewportHeight = window.innerHeight;
-            const centeredTop = Math.max(20, (viewportHeight - popoutHeight) / 2);
+            // Check if we have a saved position
+            const savedPosition = game.settings.get('sleek-chat', 'popoutPosition');
 
-            this.popoutHtml.css('top', `${centeredTop}px`);
-            console.log(`PopoutChatManager: Centered position - height: ${popoutHeight}px, viewport: ${viewportHeight}px, top: ${centeredTop}px`);
+            if (savedPosition && savedPosition.top && savedPosition.left) {
+                // Restore saved position (CSS and App)
+                this.popoutHtml.css({
+                    'top': `${savedPosition.top}px`,
+                    'left': `${savedPosition.left}px`
+                });
+
+                // Sync app position immediately
+                if (this.popoutApp && this.popoutApp.position) {
+                    this.popoutApp.position.top = savedPosition.top;
+                    this.popoutApp.position.left = savedPosition.left;
+                }
+
+                console.log(`PopoutChatManager: Restored saved position - top: ${savedPosition.top}px, left: ${savedPosition.left}px`);
+            } else {
+                // Center vertically
+                const popoutHeight = this.popoutHtml.outerHeight();
+                const viewportHeight = window.innerHeight;
+                const centeredTop = Math.max(20, (viewportHeight - popoutHeight) / 2);
+                const currentLeft = Math.round(parseFloat(this.popoutHtml.css('left')) || 0);
+
+                this.popoutHtml.css('top', `${centeredTop}px`);
+
+                // Sync app position
+                if (this.popoutApp && this.popoutApp.position) {
+                    this.popoutApp.position.top = centeredTop;
+                    this.popoutApp.position.left = currentLeft;
+                }
+
+                console.log(`PopoutChatManager: Centered position - height: ${popoutHeight}px, viewport: ${viewportHeight}px, top: ${centeredTop}px`);
+            }
+
+            // Ensure on screen (this will also sync app.position)
             this.ensureOnScreen();
+
+            // Mark as ready
             this.initialPositionSet = true;
             this.setupPositionSaving();
+
+            const finalTop = Math.round(parseFloat(this.popoutHtml.css('top')) || 0);
+            const finalLeft = Math.round(parseFloat(this.popoutHtml.css('left')) || 0);
+            const appTop = this.popoutApp?.position?.top || 'N/A';
+            const appLeft = this.popoutApp?.position?.left || 'N/A';
+            console.log(`PopoutChatManager: Initial position FINAL - CSS(${finalTop}, ${finalLeft}) vs App(${appTop}, ${appLeft})`);
         });
     }
 
     static ensureOnScreen() {
-        requestAnimationFrame(() => {
-            const popoutWidth = this.popoutHtml.outerWidth();
-            const popoutHeight = this.popoutHtml.outerHeight();
-            let top = parseInt(this.popoutHtml.css('top')) || 0;
-            let left = parseInt(this.popoutHtml.css('left')) || 0;
+        const popoutWidth = this.popoutHtml.outerWidth();
+        const popoutHeight = this.popoutHtml.outerHeight();
+        let top = Math.round(parseFloat(this.popoutHtml.css('top')) || 0);
+        let left = Math.round(parseFloat(this.popoutHtml.css('left')) || 0);
 
-            // Clamp to viewport bounds
-            const maxTop = window.innerHeight - popoutHeight - 20;
-            const maxLeft = window.innerWidth - popoutWidth - 20;
+        console.log(`PopoutChatManager: ensureOnScreen BEFORE - CSS top: ${top}px, left: ${left}px`);
 
-            top = Math.max(20, Math.min(top, maxTop));
-            left = Math.max(20, Math.min(left, maxLeft));
+        // Clamp to viewport bounds
+        const maxTop = window.innerHeight - popoutHeight - 20;
+        const maxLeft = window.innerWidth - popoutWidth - 20;
 
-            this.popoutHtml.css({ 'top': `${top}px`, 'left': `${left}px` });
-            debugLog(`PopoutChatManager: Ensured on screen - top: ${top}px, left: ${left}px`);
-        });
+        top = Math.max(20, Math.min(top, maxTop));
+        left = Math.max(20, Math.min(left, maxLeft));
+
+        // Update CSS
+        this.popoutHtml.css({ 'top': `${top}px`, 'left': `${left}px` });
+
+        // CRITICAL: Sync Foundry's app.position to match CSS
+        if (this.popoutApp && this.popoutApp.position) {
+            this.popoutApp.position.top = top;
+            this.popoutApp.position.left = left;
+            console.log(`PopoutChatManager: Synced app.position to (${top}, ${left})`);
+        }
+
+        console.log(`PopoutChatManager: ensureOnScreen AFTER - top: ${top}px, left: ${left}px`);
     }
 
     static setupPositionSaving() {
-        // Save position when window is dragged
-        this.popoutHtml.on('dragstop.sleekPosition', () => {
-            const position = {
-                top: parseInt(this.popoutHtml.css('top')) || 0,
-                left: parseInt(this.popoutHtml.css('left')) || 0
-            };
-            game.settings.set('sleek-chat', 'popoutPosition', position);
-            debugLog(`PopoutChatManager: Saved position - top: ${position.top}px, left: ${position.left}px`);
+        console.log("[SLEEK] Setting up position saving listeners");
+
+        // Capture position at EXACT moment of mousedown (before Foundry's drag starts)
+        this.popoutHtml.find('.window-header').on('mousedown.sleekPosition', (e) => {
+            const cssTop = Math.round(parseFloat(this.popoutHtml.css('top')) || 0);
+            const cssLeft = Math.round(parseFloat(this.popoutHtml.css('left')) || 0);
+            const appTop = this.popoutApp?.position?.top || 'N/A';
+            const appLeft = this.popoutApp?.position?.left || 'N/A';
+
+            console.log(`[SLEEK CLICK] MOUSEDOWN on header - CSS(${cssTop}, ${cssLeft}) vs App(${appTop}, ${appLeft})`);
         });
+
+        // Try mouseup on window-header to catch end of drag
+        this.popoutHtml.find('.window-header').on('mouseup.sleekPosition', (e) => {
+            // Small delay to let Foundry finish updating position
+            setTimeout(() => {
+                const cssTop = Math.round(parseFloat(this.popoutHtml.css('top')) || 0);
+                const cssLeft = Math.round(parseFloat(this.popoutHtml.css('left')) || 0);
+
+                console.log(`[SLEEK] MOUSEUP on header - CSS(${cssTop}, ${cssLeft})`);
+
+                const position = {
+                    top: cssTop,
+                    left: cssLeft
+                };
+
+                console.log(`[SLEEK] SAVING position:`, position);
+                game.settings.set('sleek-chat', 'popoutPosition', position);
+
+                // Verify it saved
+                const saved = game.settings.get('sleek-chat', 'popoutPosition');
+                console.log(`[SLEEK] VERIFIED saved position:`, saved);
+            }, 100);
+        });
+
+        // Also try all possible drag events for debugging
+        ['dragstart', 'drag', 'dragend', 'dragstop'].forEach(eventName => {
+            this.popoutHtml.on(`${eventName}.sleekPosition`, () => {
+                console.log(`[SLEEK EVENT] ${eventName} fired`);
+            });
+        });
+
+        console.log("[SLEEK] Position saving listeners attached");
     }
 
     static hideHeader() {
@@ -133,6 +198,7 @@ export class PopoutChatManager {
             <div class="sleek-popout-controls">
                 <div class="navigation-buttons">
                     <button class="sleek-nav-prev" title="Previous Message">◀ Prev</button>
+                    <button class="sleek-nav-bottom" title="Jump to Bottom">▼</button>
                     <button class="sleek-nav-next" title="Next Message">Next ▶</button>
                 </div>
             </div>
@@ -155,7 +221,7 @@ export class PopoutChatManager {
 
     static initializeMessageManager() {
         debugLog("PopoutChatManager: Initializing message manager");
-        PopoutMessageManager.initialize(this.popoutHtml);
+        PopoutMessageManager.initialize(this.popoutHtml, this.popoutApp);
     }
 
     static setupCleanup() {
@@ -172,9 +238,10 @@ export class PopoutChatManager {
     static cleanup() {
         debugLog("PopoutChatManager: Cleaning up");
 
-        // Remove position saving listener
+        // Remove position saving listeners
         if (this.popoutHtml) {
             this.popoutHtml.off('.sleekPosition');
+            this.popoutHtml.find('.window-header').off('.sleekPosition');
         }
 
         // Cleanup sub-managers

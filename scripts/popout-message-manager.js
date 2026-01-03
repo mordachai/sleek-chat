@@ -5,11 +5,16 @@ export class PopoutMessageManager {
     static messageIds = [];
     static currentMessageIndex = -1;
     static popoutHtml = null;
+    static popoutApp = null;
 
-    static initialize(html) {
+    // Animation duration - must match CSS animation (styles.css)
+    static SLIDE_ANIMATION_DURATION = 300; // milliseconds
+
+    static initialize(html, app) {
         console.log("PopoutMessageManager: Initializing");
         // Ensure jQuery wrapped
         this.popoutHtml = html instanceof jQuery ? html : $(html);
+        this.popoutApp = app;
         this.populateMessageIds();
         this.setupNavigationButtons();
         this.showLastMessage();
@@ -29,53 +34,87 @@ export class PopoutMessageManager {
             this.popoutHtml.find('.chat-log').addClass('sleek-chat-popout-mode');
             return;
         }
-        this.showMessage(this.currentMessageIndex);
+        this.showMessage(this.currentMessageIndex, false, false); // Don't adjust position, no animation
     }
 
-    static showMessage(index) {
-        debugLog(`PopoutMessageManager: Showing message at index ${index}`);
+    static showMessage(index, adjustPosition = true, animate = false) {
+        console.log(`[SLEEK] showMessage called - index: ${index}, adjustPosition: ${adjustPosition}, animate: ${animate}`);
 
         // Get popout container and current height before change
         const popoutContainer = this.popoutHtml.closest('#chat-popout');
-        const oldHeight = popoutContainer.outerHeight();
+        const oldHeight = Math.round(popoutContainer.outerHeight());
+        const oldTop = Math.round(parseFloat(popoutContainer.css('top')) || 0);
 
-        // Add mode class and hide all messages
+        console.log(`[SLEEK] BEFORE - oldTop: ${oldTop}px, oldHeight: ${oldHeight}px`);
+
+        // Add mode class and hide all messages (remove animation class)
         this.popoutHtml.find('.chat-log').addClass('sleek-chat-popout-mode');
-        this.popoutHtml.find('.chat-log li.chat-message').removeClass('sleek-visible');
+        this.popoutHtml.find('.chat-log li.chat-message').removeClass('sleek-visible sleek-animate');
 
         // Show selected message
         const messageId = this.messageIds[index];
         const messageElement = this.popoutHtml.find(`li[data-message-id="${messageId}"]`);
 
         if (messageElement.length > 0) {
-            messageElement.addClass('sleek-visible');
-            debugLog(`PopoutMessageManager: Showing message ${messageId}`);
+            // Add visible class, optionally add animate class
+            if (animate) {
+                messageElement.addClass('sleek-visible sleek-animate');
+            } else {
+                messageElement.addClass('sleek-visible');
+            }
+            console.log(`[SLEEK] Message ${messageId} now visible (animate: ${animate})`);
 
-            // Anchor from bottom: adjust top position to compensate for height change
-            // Only do this after initial position has been set
-            if (PopoutChatManager.initialPositionSet) {
-                requestAnimationFrame(() => {
-                    const newHeight = popoutContainer.outerHeight();
-                    const heightDiff = newHeight - oldHeight;
+            // Anchor from bottom: calculate and adjust position
+            // Only adjust position when navigating, NOT when new messages arrive
+            if (PopoutChatManager.initialPositionSet && adjustPosition) {
+                // Force layout calculation - measure actual rendered height
+                popoutContainer[0].offsetHeight; // Force reflow
+                const newHeight = Math.round(popoutContainer.outerHeight());
+                const heightDiff = newHeight - oldHeight;
 
-                    if (heightDiff !== 0) {
-                        const currentTop = parseInt(popoutContainer.css('top')) || 0;
-                        const newTop = currentTop - heightDiff;
-                        popoutContainer.css('top', `${newTop}px`);
+                console.log(`[SLEEK] AFTER - newHeight: ${newHeight}px, heightDiff: ${heightDiff}px`);
 
-                        // Save the adjusted position
-                        const position = {
-                            top: newTop,
-                            left: parseInt(popoutContainer.css('left')) || 0
-                        };
-                        game.settings.set('sleek-chat', 'popoutPosition', position);
+                if (heightDiff !== 0) {
+                    const newTop = oldTop - heightDiff;
+                    console.log(`[SLEEK] ADJUSTING - Setting top from ${oldTop}px to ${newTop}px`);
 
-                        debugLog(`PopoutMessageManager: Adjusted top by ${-heightDiff}px (height changed by ${heightDiff}px)`);
+                    // Log app position before change
+                    if (this.popoutApp && this.popoutApp.position) {
+                        console.log(`[SLEEK] App position BEFORE - top: ${this.popoutApp.position.top}px, left: ${this.popoutApp.position.left}px`);
                     }
-                });
+
+                    // Directly set CSS without Foundry's setPosition (avoid constraints)
+                    popoutContainer.css('top', `${newTop}px`);
+
+                    // Update Foundry's internal position state
+                    if (this.popoutApp && this.popoutApp.position) {
+                        this.popoutApp.position.top = newTop;
+                        console.log(`[SLEEK] App position AFTER - top: ${this.popoutApp.position.top}px, left: ${this.popoutApp.position.left}px`);
+                    }
+
+                    // Ensure window stays on screen (tall messages could push header off-screen)
+                    if (PopoutChatManager.ensureOnScreen) {
+                        PopoutChatManager.ensureOnScreen();
+                    }
+
+                    // Verify CSS actually updated
+                    const actualTop = Math.round(parseFloat(popoutContainer.css('top')) || 0);
+                    console.log(`[SLEEK] CSS top verified: ${actualTop}px`);
+
+                    // Save the adjusted position
+                    const position = {
+                        top: newTop,
+                        left: Math.round(parseFloat(popoutContainer.css('left')) || 0)
+                    };
+                    game.settings.set('sleek-chat', 'popoutPosition', position);
+                } else {
+                    console.log(`[SLEEK] NO ADJUSTMENT - heights are the same`);
+                }
+            } else if (!adjustPosition) {
+                console.log(`[SLEEK] SKIPPED - adjustPosition is false`);
             }
         } else {
-            debugLog(`PopoutMessageManager: Warning - Message ${messageId} not found in DOM`);
+            console.log(`[SLEEK] WARNING - Message ${messageId} not found in DOM`);
         }
 
         this.updateButtonStates();
@@ -145,7 +184,22 @@ export class PopoutMessageManager {
             this.navigateMessages(1);
         });
 
+        this.popoutHtml.find('.sleek-nav-bottom').on('click', () => {
+            this.jumpToBottom();
+        });
+
         debugLog("PopoutMessageManager: Navigation buttons set up");
+    }
+
+    static jumpToBottom() {
+        debugLog("PopoutMessageManager: Jumping to bottom (last message)");
+
+        this.validateMessageIds();
+
+        if (this.messageIds.length > 0) {
+            this.currentMessageIndex = this.messageIds.length - 1;
+            this.showMessage(this.currentMessageIndex);
+        }
     }
 
     static handleNewMessage(messageId) {
@@ -164,7 +218,7 @@ export class PopoutMessageManager {
 
         // Wait a brief moment for DOM to update
         setTimeout(() => {
-            this.showMessage(this.currentMessageIndex);
+            this.showMessage(this.currentMessageIndex, false, true); // Don't adjust position, but animate new messages
         }, 100);
     }
 
@@ -182,7 +236,7 @@ export class PopoutMessageManager {
 
             // Show the adjusted message or handle empty state
             if (this.messageIds.length > 0) {
-                this.showMessage(this.currentMessageIndex);
+                this.showMessage(this.currentMessageIndex, false, false); // Don't adjust position on deletion, no animation
             } else {
                 debugLog("PopoutMessageManager: No messages remaining after deletion");
                 this.popoutHtml.find('.chat-log').addClass('sleek-chat-popout-mode');
@@ -196,5 +250,6 @@ export class PopoutMessageManager {
         this.messageIds = [];
         this.currentMessageIndex = -1;
         this.popoutHtml = null;
+        this.popoutApp = null;
     }
 }

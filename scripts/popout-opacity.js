@@ -7,6 +7,9 @@ export class PopoutOpacityManager {
     static isHovered = false;
     static isFocused = false;
 
+    // ⚙️ ANIMATION DURATION - Adjust this value to change slide-in animation speed
+    static SLIDE_ANIMATION_DURATION = 300; // milliseconds (must match CSS animation duration)
+
     static initialize(html) {
         console.log("PopoutOpacityManager: Initializing");
         // Ensure jQuery wrapped
@@ -138,12 +141,17 @@ export class PopoutOpacityManager {
     }
 
     static handleNewMessage() {
-        debugLog("PopoutOpacityManager: New message - resetting to 100% and restarting timer");
+        debugLog("PopoutOpacityManager: New message - resetting to 100% and restarting timer after animation");
         this.setOpacity(1.0, true);
 
         // Only restart timer if user is not currently interacting
+        // Wait for slide animation to complete before starting fade timer
         if (!this.isHovered && !this.isFocused) {
-            this.startFadeTimer();
+            setTimeout(() => {
+                if (!this.isHovered && !this.isFocused) {
+                    this.startFadeTimer();
+                }
+            }, this.SLIDE_ANIMATION_DURATION);
         }
     }
 

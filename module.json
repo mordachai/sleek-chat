@@ -2,7 +2,7 @@
   "id": "sleek-chat",
   "title": "Sleek Chat",
   "description": "Minimalist chat popout enhancements for Foundry VTT v13+. Shows only the current message with navigation controls and customizable opacity.",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "compatibility": {
     "minimum": "12",
     "verified": "13"

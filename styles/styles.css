@@ -8,6 +8,8 @@
     background: none !important;
     box-shadow: none !important;
     border: none !important;
+    height: auto !important;
+    min-height: 100px !important;
 }
 
 /* Remove background and borders from popout chat */
@@ -17,9 +19,22 @@
     border: none !important;
 }
 
+/* Hide Foundry's jump-to-bottom button in popout */
+#chat-popout.sleek-popout-modified .jump-to-bottom {
+    display: none !important;
+}
+
 #chat-popout.sleek-popout-modified .window-content {
     border: none !important;
     background: none !important;
+    height: auto !important;
+}
+
+/* Allow chat scroll area to resize with content */
+#chat-popout.sleek-popout-modified .chat-scroll {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
 }
 
 /* Hide all messages by default in popout mode */
@@ -27,7 +42,23 @@
     display: none;
 }
 
-/* Show only current message */
+/* Show only current message with slide animation (only for new messages) */
+.chat-log.sleek-chat-popout-mode li.chat-message.sleek-visible.sleek-animate {
+    animation: slideInFromBottom 0.3s ease-out;
+}
+
+@keyframes slideInFromBottom {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Visible messages without animation */
 .chat-log.sleek-chat-popout-mode li.chat-message.sleek-visible {
     display: block;
 }
@@ -51,7 +82,8 @@
 }
 
 .sleek-nav-prev,
-.sleek-nav-next {
+.sleek-nav-next,
+.sleek-nav-bottom {
     background-color: #4b4e52;
     color: white;
     flex: 1;
@@ -72,12 +104,20 @@
 }
 
 .sleek-nav-prev:hover:not(:disabled),
-.sleek-nav-next:hover:not(:disabled) {
+.sleek-nav-next:hover:not(:disabled),
+.sleek-nav-bottom:hover {
     background-color: #5a6fb4;
 }
 
 .sleek-nav-prev:active:not(:disabled),
-.sleek-nav-next:active:not(:disabled) {
+.sleek-nav-next:active:not(:disabled),
+.sleek-nav-bottom:active {
     background-color: #4a5a94;
 }
+
+.sleek-nav-bottom {
+    flex: 0.5;
+}
+
+
 
