@@ -38,7 +38,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 8px 12px;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0);
     border-top: 1px solid #4b4e52;
     gap: 10px;
 }
@@ -47,12 +47,14 @@
 .sleek-popout-controls .navigation-buttons {
     display: flex;
     gap: 5px;
+    width: 100%;
 }
 
 .sleek-nav-prev,
 .sleek-nav-next {
     background-color: #4b4e52;
     color: white;
+    flex: 1;
     border: none;
     border-radius: 3px;
     padding: 6px 12px;
