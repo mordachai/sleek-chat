@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "WebSearch"
+      "WebSearch",
+      "Bash(find /mnt/arch-home/gus/foundry/v14/common/templates -name \"*chat*\" -o -name \"*sidebar*\" | grep -i chat)",
+      "Read(//mnt/arch-home/gus/foundry/v14/common/**)",
+      "Bash(ls /mnt/arch-home/gus/foundry/v14/common/templates/sidebar/tabs/)",
+      "Read(//mnt/arch-home/gus/foundry/v14/common/templates/sidebar/**)",
+      "Bash(find /mnt/arch-home/gus/foundry/v14 -name \"*.hbs\" -path \"*chat*\" -type f)",
+      "Read(//mnt/arch-home/gus/foundry/v14/**)",
+      "Bash(grep -r \"jQuery\\\\|window.\\\\$\\\\|\\\\$ =\" /mnt/arch-home/gus/foundry/v14/client --include=\"*.mjs\" --include=\"*.js\")",
+      "Bash(grep -r \"window\\\\.\\\\$\\\\|global.\\\\$\" /mnt/arch-home/gus/foundry/v14/client --include=\"*.mjs\" --include=\"*.js\")"
     ]
   }
 }

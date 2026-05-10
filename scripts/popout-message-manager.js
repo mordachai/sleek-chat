@@ -4,16 +4,14 @@ import { PopoutChatManager } from './popout-chat.js';
 export class PopoutMessageManager {
     static messageIds = [];
     static currentMessageIndex = -1;
-    static popoutHtml = null;
+    static popoutEl = null;
     static popoutApp = null;
 
-    // Animation duration - must match CSS animation (styles.css)
-    static SLIDE_ANIMATION_DURATION = 300; // milliseconds
+    static SLIDE_ANIMATION_DURATION = 300;
 
-    static initialize(html, app) {
+    static initialize(element, app) {
         console.log("PopoutMessageManager: Initializing");
-        // Ensure jQuery wrapped
-        this.popoutHtml = html instanceof jQuery ? html : $(html);
+        this.popoutEl = element;
         this.popoutApp = app;
         this.populateMessageIds();
         this.setupNavigationButtons();
@@ -22,8 +20,8 @@ export class PopoutMessageManager {
     }
 
     static populateMessageIds() {
-        const messages = this.popoutHtml.find('.chat-log li[data-message-id]');
-        this.messageIds = messages.map((i, el) => el.dataset.messageId).get();
+        const messages = this.popoutEl.querySelectorAll('.chat-log li[data-message-id]');
+        this.messageIds = Array.from(messages).map(el => el.dataset.messageId);
         this.currentMessageIndex = this.messageIds.length - 1;
         debugLog(`PopoutMessageManager: Populated ${this.messageIds.length} message IDs`);
     }
@@ -31,45 +29,36 @@ export class PopoutMessageManager {
     static showLastMessage() {
         if (this.messageIds.length === 0) {
             debugLog("PopoutMessageManager: No messages to display");
-            this.popoutHtml.find('.chat-log').addClass('sleek-chat-popout-mode');
+            this.popoutEl.querySelector('.chat-log')?.classList.add('sleek-chat-popout-mode');
             return;
         }
-        this.showMessage(this.currentMessageIndex, false, false); // Don't adjust position, no animation
+        this.showMessage(this.currentMessageIndex, false, false);
     }
 
     static showMessage(index, adjustPosition = true, animate = false) {
         console.log(`[SLEEK] showMessage called - index: ${index}, adjustPosition: ${adjustPosition}, animate: ${animate}`);
 
-        // Get popout container and current height before change
-        const popoutContainer = this.popoutHtml.closest('#chat-popout');
-        const oldHeight = Math.round(popoutContainer.outerHeight());
-        const oldTop = Math.round(parseFloat(popoutContainer.css('top')) || 0);
+        const oldHeight = Math.round(this.popoutEl.offsetHeight);
+        const oldTop = Math.round(parseFloat(this.popoutEl.style.top) || 0);
 
         console.log(`[SLEEK] BEFORE - oldTop: ${oldTop}px, oldHeight: ${oldHeight}px`);
 
-        // Add mode class and hide all messages (remove animation class)
-        this.popoutHtml.find('.chat-log').addClass('sleek-chat-popout-mode');
-        this.popoutHtml.find('.chat-log li.chat-message').removeClass('sleek-visible sleek-animate');
+        this.popoutEl.querySelector('.chat-log')?.classList.add('sleek-chat-popout-mode');
+        this.popoutEl.querySelectorAll('.chat-log li.chat-message').forEach(el => {
+            el.classList.remove('sleek-visible', 'sleek-animate');
+        });
 
-        // Show selected message
         const messageId = this.messageIds[index];
-        const messageElement = this.popoutHtml.find(`li[data-message-id="${messageId}"]`);
+        const messageElement = this.popoutEl.querySelector(`li[data-message-id="${messageId}"]`);
 
-        if (messageElement.length > 0) {
-            // Add visible class, optionally add animate class
-            if (animate) {
-                messageElement.addClass('sleek-visible sleek-animate');
-            } else {
-                messageElement.addClass('sleek-visible');
-            }
+        if (messageElement) {
+            messageElement.classList.add('sleek-visible');
+            if (animate) messageElement.classList.add('sleek-animate');
             console.log(`[SLEEK] Message ${messageId} now visible (animate: ${animate})`);
 
-            // Anchor from bottom: calculate and adjust position
-            // Only adjust position when navigating, NOT when new messages arrive
             if (PopoutChatManager.initialPositionSet && adjustPosition) {
-                // Force layout calculation - measure actual rendered height
-                popoutContainer[0].offsetHeight; // Force reflow
-                const newHeight = Math.round(popoutContainer.outerHeight());
+                void this.popoutEl.offsetHeight; // Force reflow
+                const newHeight = Math.round(this.popoutEl.offsetHeight);
                 const heightDiff = newHeight - oldHeight;
 
                 console.log(`[SLEEK] AFTER - newHeight: ${newHeight}px, heightDiff: ${heightDiff}px`);
@@ -78,35 +67,18 @@ export class PopoutMessageManager {
                     const newTop = oldTop - heightDiff;
                     console.log(`[SLEEK] ADJUSTING - Setting top from ${oldTop}px to ${newTop}px`);
 
-                    // Log app position before change
-                    if (this.popoutApp && this.popoutApp.position) {
-                        console.log(`[SLEEK] App position BEFORE - top: ${this.popoutApp.position.top}px, left: ${this.popoutApp.position.left}px`);
-                    }
+                    this.popoutEl.style.top = `${newTop}px`;
 
-                    // Directly set CSS without Foundry's setPosition (avoid constraints)
-                    popoutContainer.css('top', `${newTop}px`);
-
-                    // Update Foundry's internal position state
-                    if (this.popoutApp && this.popoutApp.position) {
+                    if (this.popoutApp?.position) {
                         this.popoutApp.position.top = newTop;
-                        console.log(`[SLEEK] App position AFTER - top: ${this.popoutApp.position.top}px, left: ${this.popoutApp.position.left}px`);
                     }
 
-                    // Ensure window stays on screen (tall messages could push header off-screen)
-                    if (PopoutChatManager.ensureOnScreen) {
-                        PopoutChatManager.ensureOnScreen();
-                    }
+                    PopoutChatManager.ensureOnScreen?.();
 
-                    // Verify CSS actually updated
-                    const actualTop = Math.round(parseFloat(popoutContainer.css('top')) || 0);
-                    console.log(`[SLEEK] CSS top verified: ${actualTop}px`);
-
-                    // Save the adjusted position
-                    const position = {
+                    game.settings.set('sleek-chat', 'popoutPosition', {
                         top: newTop,
-                        left: Math.round(parseFloat(popoutContainer.css('left')) || 0)
-                    };
-                    game.settings.set('sleek-chat', 'popoutPosition', position);
+                        left: Math.round(parseFloat(this.popoutEl.style.left) || 0)
+                    });
                 } else {
                     console.log(`[SLEEK] NO ADJUSTMENT - heights are the same`);
                 }
@@ -136,16 +108,14 @@ export class PopoutMessageManager {
     static validateMessageIds() {
         const originalLength = this.messageIds.length;
 
-        // Filter out messages that no longer exist in the DOM
         this.messageIds = this.messageIds.filter(id =>
-            this.popoutHtml.find(`li[data-message-id="${id}"]`).length > 0
+            this.popoutEl.querySelector(`li[data-message-id="${id}"]`) !== null
         );
 
         if (this.messageIds.length !== originalLength) {
             debugLog(`PopoutMessageManager: Validated messages - removed ${originalLength - this.messageIds.length} deleted messages`);
         }
 
-        // Adjust current index if it's out of bounds
         if (this.currentMessageIndex >= this.messageIds.length) {
             this.currentMessageIndex = this.messageIds.length - 1;
         }
@@ -158,33 +128,30 @@ export class PopoutMessageManager {
     }
 
     static updateButtonStates() {
-        const prevBtn = this.popoutHtml.find('.sleek-nav-prev');
-        const nextBtn = this.popoutHtml.find('.sleek-nav-next');
+        const prevBtn = this.popoutEl.querySelector('.sleek-nav-prev');
+        const nextBtn = this.popoutEl.querySelector('.sleek-nav-next');
 
-        if (prevBtn.length === 0 || nextBtn.length === 0) {
+        if (!prevBtn || !nextBtn) {
             debugLog("PopoutMessageManager: Navigation buttons not found");
             return;
         }
 
-        const atStart = this.currentMessageIndex <= 0;
-        const atEnd = this.currentMessageIndex >= this.messageIds.length - 1;
+        prevBtn.disabled = this.currentMessageIndex <= 0;
+        nextBtn.disabled = this.currentMessageIndex >= this.messageIds.length - 1;
 
-        prevBtn.prop('disabled', atStart);
-        nextBtn.prop('disabled', atEnd);
-
-        debugLog(`PopoutMessageManager: Button states - Prev: ${atStart ? 'disabled' : 'enabled'}, Next: ${atEnd ? 'disabled' : 'enabled'}`);
+        debugLog(`PopoutMessageManager: Button states - Prev: ${prevBtn.disabled ? 'disabled' : 'enabled'}, Next: ${nextBtn.disabled ? 'disabled' : 'enabled'}`);
     }
 
     static setupNavigationButtons() {
-        this.popoutHtml.find('.sleek-nav-prev').on('click', () => {
+        this.popoutEl.querySelector('.sleek-nav-prev')?.addEventListener('click', () => {
             this.navigateMessages(-1);
         });
 
-        this.popoutHtml.find('.sleek-nav-next').on('click', () => {
+        this.popoutEl.querySelector('.sleek-nav-next')?.addEventListener('click', () => {
             this.navigateMessages(1);
         });
 
-        this.popoutHtml.find('.sleek-nav-bottom').on('click', () => {
+        this.popoutEl.querySelector('.sleek-nav-bottom')?.addEventListener('click', () => {
             this.jumpToBottom();
         });
 
@@ -207,18 +174,15 @@ export class PopoutMessageManager {
 
         this.messageIds.push(messageId);
 
-        // Maintain 50 message limit
         if (this.messageIds.length > 50) {
             const removed = this.messageIds.shift();
             debugLog(`PopoutMessageManager: Removed oldest message ${removed} (50 message limit)`);
         }
 
-        // Navigate to the newest message
         this.currentMessageIndex = this.messageIds.length - 1;
 
-        // Wait a brief moment for DOM to update
         setTimeout(() => {
-            this.showMessage(this.currentMessageIndex, false, true); // Don't adjust position, but animate new messages
+            this.showMessage(this.currentMessageIndex, false, true);
         }, 100);
     }
 
@@ -229,18 +193,18 @@ export class PopoutMessageManager {
         if (index > -1) {
             this.messageIds.splice(index, 1);
 
-            // If we were viewing the deleted message, adjust the index
             if (this.currentMessageIndex >= this.messageIds.length) {
                 this.currentMessageIndex = this.messageIds.length - 1;
             }
 
-            // Show the adjusted message or handle empty state
             if (this.messageIds.length > 0) {
-                this.showMessage(this.currentMessageIndex, false, false); // Don't adjust position on deletion, no animation
+                this.showMessage(this.currentMessageIndex, false, false);
             } else {
                 debugLog("PopoutMessageManager: No messages remaining after deletion");
-                this.popoutHtml.find('.chat-log').addClass('sleek-chat-popout-mode');
-                this.popoutHtml.find('.chat-log li.chat-message').removeClass('sleek-visible');
+                this.popoutEl.querySelector('.chat-log')?.classList.add('sleek-chat-popout-mode');
+                this.popoutEl.querySelectorAll('.chat-log li.chat-message').forEach(el => {
+                    el.classList.remove('sleek-visible');
+                });
             }
         }
     }
@@ -249,7 +213,7 @@ export class PopoutMessageManager {
         debugLog("PopoutMessageManager: Cleaning up");
         this.messageIds = [];
         this.currentMessageIndex = -1;
-        this.popoutHtml = null;
+        this.popoutEl = null;
         this.popoutApp = null;
     }
 }

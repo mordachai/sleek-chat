@@ -28,7 +28,7 @@ Hooks.once('init', function() {
             max: 10000,
             step: 100
         },
-        default: 2000
+        default: 7000
     });
 
     // Popout Position (hidden setting for saving window position)
